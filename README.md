@@ -38,7 +38,13 @@ Para contribuir o reportar errores, por favor abrir un issue en el repositorio d
 
 
 # Agracedimientos
-Datahub, Pablo Astudillo, Pablo Medina
+Agradecemos a las siguientes personas por su contribución al proyecto:
+Kristian Mendoza,
+Pablo Medina,
+Pablo Astudillo,
+el USFQ Datahub,
+y a todos los que han contribuido al proyecto.
+
 
 # Información Legal
 ## Ley de datos personales en Ecuador
@@ -64,7 +70,7 @@ Para citar este proyecto, por favor use la siguiente referencia:
 }
 ```
 # Contacto
-Para cualquier duda o comentario, por favor contactar a Kristian Mendoza o al Datahub.
+Para cualquier duda o comentario, por favor contactar a Kristian Mendoza o al USFQ Datahub.
 
 
 
