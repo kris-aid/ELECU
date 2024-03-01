@@ -88,24 +88,58 @@ Tabla de dignidades
 ![Geográficos](assests/Tabla_colores_geográficos.png)
 ![eleccion](assests/Tabla_colores_eleccion.png)
 
+Solo para los años 2018-2023 se tiene la información de las consultas populares y referendums.
 
+![consultas](assests/Tabla_Consultas.png)
+
+### Provincias
+Se encuentra el código de la provincia y el nombre de la provincia.
+### Cantones
+Se encuentra el código del cantón y el nombre del cantón.
+Este código no es estandarizado y existen cambios de códigos de un año a otro.
+
+### Parroquias
+Se encuentra el código de la parroquia y el nombre de la parroquia.
+Este código no es estandarizado y existen cambios de códigos de un año a otro.
+Además, hay parroquias que cambian de provincia y cantón de un año a otro. Por Ejemplo: La parroquia Manga del Cura en el 2023 pertenece a la provincia de Esmeraldas y al cantón de San Lorenzo. En el 2021 pertenecía a la provincia de Manabí y al cantón de Manta.
 
 ## Registro electoral
-Se 
+Se tiene la información sobre los electores por cada parroquia
+
 ## Organizaciones Políticas
+Información sobre las organizaciones políticas y sus candidatos
+
+### Problemas
+- Inconsistencia en los códigos de las organizaciones de año a año
+- Ausencia de código unico de candidatos.
+
+
 ## Resultados
+- Se tiene la información por cada una de las juntas receptoras del voto
 
 # Descripción de la Estructura de los resultados
 La unidad mínima de agregación del voto es la Junta Receptora del Voto
 ## Columnas
+No existe un código para identificar la junta receptora del voto
+- Código de la provincia
+- Código del cantón
+- Código de la parroquia
+- Código de la Circunscripción
+- Genero de la junta
+- 
 ## Problemas
 Inconsistencia en las bases
+Se provee de una tabla que identifica los cambios de nombres de las columnas de las bases de datos de los años 2002-2023
 
+
+ ** Tabla**
 
 # Descripción del Modelo de la Tesis
 Dividir en 3 para evitar redundancia
 
 ## Info espacial y nominal de la junta receptora
+
+
 
 ## Info Votación en la junta receptora
 
