@@ -84,7 +84,9 @@ El código es único para cada dignidad. Sin embargo hay cambios de nombres en l
 A continuación se encuentra la tabla de los códigos de las dignidades por cada elección que se tiene en el CNE.
 
 Tabla de dignidades
-
+![Dignidades](assests/Tabla_Dignidades.png)
+![Geográficos](assests/Tabla_colores_geográficos.png)
+![eleccion](assests/Tabla_colores_eleccion.png)
 
 
 
