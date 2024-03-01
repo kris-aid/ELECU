@@ -16,6 +16,7 @@ Los datos oficiales se encuentran disponibles en el [portal de datos abiertos de
 
 * Para más información revisar el documento de [Contexto](Context.md)   
 ## Procesamiento
+## Lugar de Almacenamiento de los Datos Procesados
 
 # Requisitos
 Python 3.7 o superior, compatible con Pandas, Numpy, Geopandas, Matplotlib, Seaborn, entre otros.
@@ -45,7 +46,7 @@ Datahub, Pablo Astudillo, Pablo Medina
 
 
 # Licencia del Proyecto
-Este proyecto está bajo la licencia MIT. Para más información revisar el archivo [LICENSE](LICENSE)
+Este proyecto está bajo la licencia GNU. Para más información revisar el archivo [LICENSE](LICENSE)
 ## Licencia de los Datos
 Los datos oficiales son de dominio público. 
 Los datos procesados por Open-ELEC son de dominio público. ** Revisar**
