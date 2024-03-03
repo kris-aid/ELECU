@@ -47,16 +47,19 @@ Del 2004 al 2019 se realizaron cada 5 años. A partir del 2019 se realizaron cad
 #### Asambleístas
 
 ## Consultas Populares y Referendums
+Las consultas populares y referendums son mecanismos de participación ciudadana que se realizan para que la ciudadanía se pronuncie sobre temas de interés general. Las consultas populares son convocadas por el Presidente de la República y los referendums son convocados por la Asamblea Nacional.
+
+
 Referendums y consultas populares
--	No hay información de: Consulta Popular de Ecuador de 2006
--	No hay información de Referéndum aprobatorio de Ecuador de 2007
--	No hay información del Referéndum constitucional de Ecuador de 2008
--	No hay información del Referéndum constitucional y consulta popular de Ecuador de 2011
+-	Consulta Popular de Ecuador de 2006
+-	Referéndum aprobatorio de Ecuador de 2007
+-	Referéndum constitucional de Ecuador de 2008
+-	Referéndum constitucional y consulta popular de Ecuador de 2011
 -	No hay información de : Consulta popular de Ecuador de 2017
--	2018 NUMERO_PREGUNTA= [1..7]
--	2023: Seccionales tiene los códigos de dignidades de: 19...26
--	2023 Yasuni Dignidades= 14
--	2023 Choco Andino= 15.. 18
+-	Referéndum constitucional y consulta popular de Ecuador de 2018
+-	Consulta popular de Ecuador sobre el Yasuní de 2023 
+-	Consulta popular al cantón Quito sobre el Choco Andino
+
 
 
 ### Años
