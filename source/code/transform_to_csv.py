@@ -6,10 +6,10 @@ def convert_sav_to_csv(input_folder, output_folder):
     
     Paramaters
     ----------
-        - input_folder: str
-        path al directorio de entrada que contiene los archivos .sav
+        - input_folder: str 
+            path al directorio de entrada que contiene los archivos .sav
         - output_folder: str
-        path al directorio de salida donde se guardarán los archivos .csv
+            path al directorio de salida donde se guardarán los archivos .csv
     
     Returns
     -------
