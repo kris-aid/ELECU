@@ -1,1 +1,6 @@
 /data
+.python-version
+poetry.lock
+pyproject.toml
+/docs
+/data_csv

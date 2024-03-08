@@ -55,7 +55,7 @@ Referendums y consultas populares
 -	Referéndum aprobatorio de Ecuador de 2007
 -	Referéndum constitucional de Ecuador de 2008
 -	Referéndum constitucional y consulta popular de Ecuador de 2011
--	No hay información de : Consulta popular de Ecuador de 2017
+-	Consulta popular de Ecuador de 2017
 -	Referéndum constitucional y consulta popular de Ecuador de 2018
 -	Consulta popular de Ecuador sobre el Yasuní de 2023 
 -	Consulta popular al cantón Quito sobre el Choco Andino
