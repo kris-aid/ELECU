@@ -14,8 +14,11 @@ def convert_sav_to_csv(input_folder, output_folder):
     Returns
     -------
         none
-        
     
+    Examples
+    --------
+    convert_sav_to_csv("data", "data_csv")
+         
     '''
 
     # Crear el directorio de salida si no existe
@@ -45,8 +48,8 @@ def convert_sav_to_csv(input_folder, output_folder):
     return None
 
 
-input_folder_path="/data"
-output_folder_path="/data_csv"
+input_folder_path="data"
+output_folder_path="data_csv"
 # Llamar a la función para convertir los archivos .sav a .csv
 if __name__ == "__main__":
     print(os.getcwd())
