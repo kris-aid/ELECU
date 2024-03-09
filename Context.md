@@ -7,7 +7,9 @@ En el año 2009 se realizaron elecciones para elegir a todos los cargos de elecc
 ### Ambito Geográfico
 Las elecciones en Ecuador se realizan en 4 ambitos geográficos: Nacional, Provincial, Cantonal y Parroquial. Y adicionalmente existe las circunscripciones en determinados territorios.
 
-
+#### Explicación
+La Presidenta o Presidente y Vicepresidenta o Vicepresidente de la República, al igual que el Parlamento Andino son electos en circunscripción única. Para conformación total de la Asamblea, se elegen quince (15) asambleístas de circunscripción nacional; dos (2) asambleístas por cada provincia (uno más por cada doscientos mil habitantes o fracción); seis (6) asambleístas por las circunscripciones especiales del exterior y, dos (2) asambleístas por cada una de las regiones. En el caso de las alcaldesas y los alcaldes (circunscripciones uninominales) de los distritos metropolitanos y de los municipios cantonales, serán electos en la circunscripción territorial correspondiente, al igual que las y los integrantes de los Concejos Municipales (circunscripciones plurinominales) cuya cantidad dependerá de los criterios poblacionales establecidos en la ley.
+referencia: [CEPAL](https://oig.cepal.org/es/paises/12/system)
 
 ## Generales
 Son las elecciones conocidas también como uninominales, en las que se elige a un solo candidato para un cargo específico. En Ecuador, se elige al Presidente, Prefectos, Alcaldes, Representantes de Junta Parroquial  
@@ -45,6 +47,8 @@ Del 2004 al 2019 se realizaron cada 5 años. A partir del 2019 se realizaron cad
 ### Dignidades
 #### Consejales
 #### Asambleístas
+
+
 
 ## Consultas Populares y Referendums
 Las consultas populares y referendums son mecanismos de participación ciudadana que se realizan para que la ciudadanía se pronuncie sobre temas de interés general. Las consultas populares son convocadas por el Presidente de la República y los referendums son convocados por la Asamblea Nacional.
