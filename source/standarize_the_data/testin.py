@@ -1,24 +1,3 @@
-# Primero vamos a estandarizar los códigos  de dignidades de todas las bases.
-# Vamos a crear un diccionario con los códigos de las dignidades, su ambito georáfico y su nombre
-
-dict_dignidades = {1: ["PRESIDENCIA", "NACIONAL"],
-                   2: ["PREFECTURA", "PROVINCIAL"],
-                   3: ["CONSEJO PROVINCIAL", "PROVINCIAL"],
-                   4: ["ALCALDÍA", "CANTONAL"],
-                   5: ["CONCEJO MUNICIPAL", "CANTONAL"],
-                   6: ["JUNTA PARROQUIAL", "PARROQUIAL"],
-                   7: ["ASAMBLEA PROVINCIAL", "PROVINCIAL"],
-                   8: ["PARLAMENTO ANDINO", "NACIONAL"],
-                   9: ["ASAMBLEA NACIONAL", "NACIONAL"],
-                   10:["ASAMBLEA CIRCUNSCRIPCION","PROVINCIAL"],
-                   11:["CPCCS MUJERES","NACIONAL"],
-                   12:["CPCCS HOMBRES","NACIONAL"],
-                   13:["CPCCS NACIONAL/EXTRANJERO","NACIONAL"]}
-
-#Vamos a revisar si los códigos de dignidades de las bases de datos son los mismos que los del diccionario
-# Cada eleccion tiene un directorio llamado diccionarios que contiene un archivo llamado "dignidades_@año.csv" que contiene
-# los códigos de dignidades de esa elección. Vamos a tomar todos los archivos de ese directorio y vamos a revisar si los
-# códigos de dignidades son los mismos que los del diccionario. Si no son los mismos, vamos a cambiar los códigos de las
 
 
 import os
@@ -27,28 +6,33 @@ import numpy as np
 import re
 import sys
 import shutil
+import unidecode
 
-def check_dignidades(input_folder, dict_dignidades):
+# Recuperar todas los diccionarios de dignidades de las elecciones y colocarlos en un dataframe
+
+input_folder = "data_csv"
+
+def recuperar_dignidades(input_folder):
     '''
-    Revisa si los códigos de dignidades de las bases de datos son los mismos que los del diccionario.
-    Si no son los mismos, cambia los códigos de las bases de datos para que sean los mismos que los del diccionario.
-    
+    Recupera todas los diccionarios de dignidades de las elecciones y coloca los en un dataframe
+    Se cambian los nombres de las columnas para que no tengan caracteres especiales
     Paramaters
     ----------
         - input_folder: str 
             path al directorio que contiene los archivos .csv
-        - dict_dignidades: dict
-            diccionario con los códigos de las dignidades, su ambito georáfico y su nombre
     
     Returns
     -------
-        none
+        - df_dignidades: DataFrame
+            DataFrame con los códigos de dignidades de las elecciones
     
     Examples
     --------
-    check_dignidades("data_csv", dict_dignidades)
+    recuperar_dignidades("data_csv")
          
     '''
+    # Crear un DataFrame vacío
+    df_dignidades = pd.DataFrame()
     # Listar todos los archivos en el directorio de entrada y sus subdirectorios
     for root, dirs, files in os.walk(input_folder):
         for file in files:
@@ -58,14 +42,71 @@ def check_dignidades(input_folder, dict_dignidades):
                     file_path = os.path.join(root, file)
                     # Leer el archivo en un DataFrame
                     df = pd.read_csv(file_path)
-                    # Revisar si el DataFrame tiene la columna "dignidad"
-                    if "dignidad" in df.columns:
-                        # Revisar si los códigos de dignidades de la base de datos son los mismos que los del diccionario
-                        if not df["dignidad"].isin(dict_dignidades.keys()).all():
-                            # Si no son los mismos, cambiar los códigos de las bases de datos para que sean los mismos que los del diccionario
-                            df["dignidad"] = df["dignidad"].map(dict_dignidades)
-                            # Guardar el DataFrame con los códigos de dignidades cambiados
-                            df.to_csv(file_path, index=False)
-                            print(f"Changed the dignity codes of {file_path}")
-                
-    return None
+                    #camabiar los nombres de las columnas para que no tengan caracteres especiales
+                    df.columns = [unidecode.unidecode(col) for col in df.columns]
+                    #Los nombres y ambitos de las dignidades están en mayúsculas y tienen tildes y ñ.
+                    #Vamos a mantenerlas en mayúsculas y vamos a quitarles los tildes y la ñ
+                    df = df.apply(lambda x: x.str.upper() if x.name in ["DIGNIDAD_NOMBRE", "DIGNIDAD_AMBITO"] else x)
+                    df = df.apply(lambda x: x.apply(unidecode.unidecode) if x.name in ["DIGNIDAD_NOMBRE", "DIGNIDAD_AMBITO"] else x)
+                    
+                    
+                    #añadir el año de la elección al DataFrame
+                    año = re.findall(r'\d+', file)
+                    df["ANIO"] = año[0]
+                    # Agregar el DataFrame al DataFrame vacío
+                    df_dignidades = pd.concat([df_dignidades, df])
+    return df_dignidades
+
+df_dignidades = recuperar_dignidades(input_folder)
+print(df_dignidades)
+
+# Ahora vamos a crear un data frame con el nombre de la DIGNIDAD_NOMBRE y ámbito geográfico.
+# Y se van a crear columnas para cada año con el código que le corresponde a esa DIGNIDAD_NOMBRE en ese año.
+# Si no hay código para esa DIGNIDAD_NOMBRE en ese año, se va a colocar un NaN
+#comprobar si la DIGNIDAD_NOMBRE ya está en el dataframe y si no está, agregarla.
+# Si la DIGNIDAD_NOMBRE ya está en el dataframe, colocar su código en la columna correspondiente al año de la elección
+# Si la DIGNIDAD_NOMBRE no está en el dataframe, agregarla y colocar su código en la columna correspondiente al año de la elección
+
+def crear_df_dignidades(df_dignidades):
+    '''
+    Crea un data frame con el nombre de la DIGNIDAD_NOMBRE y ámbito geográfico.
+    Y se van a crear columnas para cada año con el código que le corresponde a esa DIGNIDAD_NOMBRE en ese año.
+    Si no hay código para esa DIGNIDAD_NOMBRE en ese año, se va a colocar un NaN
+    
+    Paramaters
+    ----------
+        - df_dignidades: DataFrame
+            DataFrame con los códigos de dignidades de las elecciones
+    
+    Returns
+    -------
+        - df_dignidades_std: DataFrame
+            DataFrame con el nombre de la DIGNIDAD_NOMBRE y ámbito geográfico y columnas para cada año con el código que le corresponde a esa DIGNIDAD_NOMBRE en ese año
+    
+    Examples
+    --------
+    crear_df_dignidades(df_dignidades)
+         
+    '''
+    # Crear un DataFrame vacío
+    df_dignidades_std = pd.DataFrame()
+    # Iterar sobre las filas del DataFrame
+    for index, row in df_dignidades.iterrows():
+        # Revisar si la DIGNIDAD_NOMBRE ya está en el dataframe
+        if row["DIGNIDAD_NOMBRE"] not in df_dignidades_std.index:
+            # Si la DIGNIDAD_NOMBRE no está en el dataframe, agregarla y colocar su código en la columna correspondiente al año de la elección
+            df_dignidades_std.loc[row["DIGNIDAD_NOMBRE"], "DIGNIDAD_AMBITO"] = row["DIGNIDAD_AMBITO"]
+            df_dignidades_std.loc[row["DIGNIDAD_NOMBRE"], row["ANIO"]] = row["DIGNIDAD_CODIGO"]
+        else:
+            # Si la DIGNIDAD_NOMBRE ya está en el dataframe, colocar su código en la columna correspondiente al año de la elección
+            df_dignidades_std.loc[row["DIGNIDAD_NOMBRE"], row["ANIO"]] = row["DIGNIDAD_CODIGO"]
+    
+    # Colocar las columnas de los años en orden
+    df_dignidades_std = df_dignidades_std.reindex(sorted(df_dignidades_std.columns), axis=1)
+    # Colocar las filas en orden
+    df_dignidades_std = df_dignidades_std.sort_index()
+    return df_dignidades_std
+
+df_dignidades_std = crear_df_dignidades(df_dignidades)
+print(df_dignidades_std)
+
