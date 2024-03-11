@@ -18,7 +18,6 @@ def convert_sav_to_csv(input_folder, output_folder):
     Examples
     --------
     convert_sav_to_csv("data", "data_csv")
-         
     '''
 
     # Crear el directorio de salida si no existe
