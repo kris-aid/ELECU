@@ -48,6 +48,12 @@ y a todos los que han contribuido al proyecto.
 
 # Información Legal
 ## Ley de datos personales en Ecuador
+El Ecuador desde el año 2021 cuenta con una Ley de Protección de Datos Personales. Para más información revisar el [Documento](https://www.finanzaspopulares.gob.ec/wp-content/uploads/2021/07/ley_organica_de_proteccion_de_datos_personales.pdf) de la ley.
+
+Para no infringir la ley, se debe tener en cuenta que los datos personales deben ser tratados con confidencialidad y seguridad.
+Y para este proyecto se tomará en cuenta el [Artículo 36](art36.md):
+
+
 
 
 
