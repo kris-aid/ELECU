@@ -58,7 +58,7 @@ Y para este proyecto se tomará en cuenta el [Artículo 36](art36.md):
 
 
 # Licencia del Proyecto
-Este proyecto está bajo la licencia GNU. Para más información revisar el archivo [LICENSE](LICENSE)
+Este proyecto está bajo la licencia GNU_GPL3. Para más información revisar el archivo [LICENSE](LICENSE.TXT)
 ## Licencia de los Datos
 Los datos oficiales son de dominio público. 
 Los datos procesados por Open-ELEC son de dominio público. ** Revisar**
