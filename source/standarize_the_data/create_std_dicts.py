@@ -268,7 +268,7 @@ class Standard_Dictionaries:
         self.df_provincias["PROVINCIA_CODIGO_OLD"] = self.df_provincias["PROVINCIA_CODIGO_x"]
         # Eliminamos las columnas que no necesitamos
         self.df_provincias = self.df_provincias.drop(columns=["PROVINCIA_CODIGO_x", "PROVINCIA_CODIGO_y", "ANIO"])
-        print(self.df_provincias)
+        #print(self.df_provincias)
         
     
         
