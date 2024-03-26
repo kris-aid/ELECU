@@ -9,7 +9,7 @@ Las elecciones en Ecuador se realizan en 4 ambitos geográficos: Nacional, Provi
 
 #### Explicación
 La Presidenta o Presidente y Vicepresidenta o Vicepresidente de la República, al igual que el Parlamento Andino son electos en circunscripción única. Para conformación total de la Asamblea, se elegen quince (15) asambleístas de circunscripción nacional; dos (2) asambleístas por cada provincia (uno más por cada doscientos mil habitantes o fracción); seis (6) asambleístas por las circunscripciones especiales del exterior y, dos (2) asambleístas por cada una de las regiones. En el caso de las alcaldesas y los alcaldes (circunscripciones uninominales) de los distritos metropolitanos y de los municipios cantonales, serán electos en la circunscripción territorial correspondiente, al igual que las y los integrantes de los Concejos Municipales (circunscripciones plurinominales) cuya cantidad dependerá de los criterios poblacionales establecidos en la ley.
-referencia: [CEPAL](https://oig.cepal.org/es/paises/12/system)
+referencia: [CEPAL](https:oig.cepal.orgespaises12system)
 
 ## Generales
 Son las elecciones conocidas también como uninominales, en las que se elige a un solo candidato para un cargo específico. En Ecuador, se elige al Presidente, Prefectos, Alcaldes, Representantes de Junta Parroquial  
@@ -76,7 +76,7 @@ Por cada eleccion se tienen 4 carpetas de información.
 
  Las carpetas son las siguientes:
 
-![Estructura CNE](assests/Captura_estructura.png)
+![Estructura CNE](Captura_estructura.png)
 
 Se describe la información que se obtiiene de cada uno de las carpetas.
 Todos se encuentran en formato ".sav"
@@ -84,20 +84,20 @@ Todos se encuentran en formato ".sav"
 Como referencia se va a explicar la estructura de las votaciones anticipadas del 2023
 
 ## Diccionarios
-![Diccionarios](assests/Captura_diccionarios.png)
+![Diccionarios](Captura_diccionarios.png)
 ### Dignidades
 Se encuentra el código, de qué ambito (Nacional, Provincial, Cantonal, Parroquial) y el nombre de la dignidad.
 El código es único para cada dignidad. Sin embargo hay cambios de nombres en las dignidades, y en algunos casos se repiten los códigos.
 A continuación se encuentra la tabla de los códigos de las dignidades por cada elección que se tiene en el CNE.
 
 Tabla de dignidades
-![Dignidades](assests/Tabla_Dignidades.png)
-![Geográficos](assests/Tabla_colores_geográficos.png)
-![eleccion](assests/Tabla_colores_eleccion.png)
+![Dignidades](Tabla_Dignidades.png)
+![Geográficos](Tabla_colores_geográficos.png)
+![eleccion](Tabla_colores_eleccion.png)
 
 Solo para los años 2018-2023 se tiene la información de las consultas populares y referendums.
 
-![consultas](assests/Tabla_Consultas.png)
+![consultas](Tabla_Consultas.png)
 
 ### Provincias
 Se encuentra el código de la provincia y el nombre de la provincia.

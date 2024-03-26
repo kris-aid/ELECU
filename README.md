@@ -4,7 +4,7 @@ Open-ELEC es un proyecto de código abierto basado en Python diseñado para mejo
 
 
 
-Para más información revisar el documento de [Contexto](Context.md)
+Para más información revisar el documento de [Contexto](assests/Context.md)
 # Datos Oficiales
 Los datos oficiales son proporcionados por el Consejo Nacional Electoral del Ecuador.
 
@@ -14,7 +14,7 @@ Los datos oficiales se encuentran disponibles en el [portal de datos abiertos de
 
 
 
-* Para más información revisar el documento de [Contexto](Context.md)   
+* Para más información revisar el documento de [Contexto](assests/Context.md)   
 ## Procesamiento
 ## Lugar de Almacenamiento de los Datos Procesados
 
@@ -42,7 +42,7 @@ Los datos oficiales son de dominio público.
 El Ecuador desde el año 2021 cuenta con una Ley de Protección de Datos Personales. Para más información revisar el [Documento](https://www.finanzaspopulares.gob.ec/wp-content/uploads/2021/07/ley_organica_de_proteccion_de_datos_personales.pdf) de la ley.
 
 Para no infringir la ley, se debe tener en cuenta que los datos personales deben ser tratados con confidencialidad y seguridad.
-Y para este proyecto se tomará en cuenta el [Artículo 36](art36.md):
+Y para este proyecto se tomará en cuenta el [Artículo 36](assests/art36.md):
 
 # Contacto
 Para cualquier duda o comentario, por favor contactar a Kristian Mendoza o al USFQ Datahub.
