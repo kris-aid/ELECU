@@ -2,6 +2,6 @@
 .python-version
 poetry.lock
 pyproject.toml
-/docs
+docs
 /data_csv
 .venv
