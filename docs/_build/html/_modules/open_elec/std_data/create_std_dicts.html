@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+
+<html lang="es" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>open_elec.std_data.create_std_dicts &#8212; documentación de Open-ELEC - 0.0.1</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d1102ebc" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=12dfc556" />
+    <script src="../../../_static/documentation_options.js?v=6fcc102b"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/translations.js?v=efdbd0b9"></script>
+    <link rel="index" title="Índice" href="../../../genindex.html" />
+    <link rel="search" title="Búsqueda" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Código fuente para open_elec.std_data.create_std_dicts</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Este script es para generar los diccionarios estandarizados de las dignidades, parroquias, cantones, provincias</span>
+
+<span class="c1"># Path: source/standarize_the_data/create_std_dicts.py</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">unidecode</span>
+<div class="viewcode-block" id="Standard_Dictionaries">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries">[documentos]</a>
+<span class="k">class</span> <span class="nc">Standard_Dictionaries</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">    Clase para estandarizar los diccionarios de las elecciones</span>
+<span class="sd">    </span>
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    </span>
+<span class="sd">    input_folder = &quot;data_csv/seccionales/2023/diccionarios&quot;</span>
+<span class="sd">    std_dicts = Standard_Dictionaries(input_folder)</span>
+<span class="sd">    std_dicts.change_to_std_dignidades()</span>
+<span class="sd">    </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_folder</span><span class="p">,</span><span class="n">standarized_folder</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Inicializa la clase</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - input_folder: str </span>
+<span class="sd">                path al directorio que contiene los archivos .csv</span>
+<span class="sd">            - standarized_folder: str</span>
+<span class="sd">                path al directorio donde se guardaran los diccionarios estandarizados como csv</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">standarized_folder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">standarized_folder</span> <span class="o">=</span> <span class="s2">&quot;data_csv/Codigos_estandar/&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">standarized_folder</span> <span class="o">=</span> <span class="n">standarized_folder</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span> <span class="o">=</span> <span class="n">input_folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recuperar_dignidades</span><span class="p">()</span>
+        <span class="c1"># self.df_parroquias = self.recuperar_parroquias()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recuperar_cantones</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recuperar_provincias</span><span class="p">()</span>
+<div class="viewcode-block" id="Standard_Dictionaries.load_std_data">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.load_std_data">[documentos]</a>
+    <span class="k">def</span> <span class="nf">load_std_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">file</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Carga los diccionarios estandarizados de las elecciones</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - file: str</span>
+<span class="sd">                path al archivo csv que contiene el archivo que esta en la carpeta &quot;data_csv/Codigos_estandar&quot;</span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - DataFrame</span>
+<span class="sd">                DataFrame con los códigos estandarizados para el procesamiento posterior</span>
+<span class="sd">                </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        load_std_data(&quot;data_csv/Codigos_estandar/dignidades/dignidades_std_post_2007.csv&quot;)</span>
+<span class="sd">        </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#Buscar en la carpeta &quot;data_csv/Codigos_estandar&quot; el archivo csv que contiene los códigos estandarizados</span>
+        <span class="c1"># Construir el path del archivo</span>
+        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">standarized_folder</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+        <span class="c1"># Leer el archivo en un DataFrame</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+        
+        
+        
+<div class="viewcode-block" id="Standard_Dictionaries.recuperar_dignidades">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.recuperar_dignidades">[documentos]</a>
+    <span class="k">def</span> <span class="nf">recuperar_dignidades</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Recupera todas los diccionarios de dignidades de las elecciones y coloca los en un dataframe</span>
+<span class="sd">        Se cambian las columnas para que no tengan caracteres especiales</span>
+<span class="sd">        </span>
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - input_folder: str </span>
+<span class="sd">                path al directorio que contiene los archivos .csv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - df_dignidades: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de dignidades de las elecciones</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        recuperar_dignidades(&quot;data_csv&quot;)</span>
+<span class="sd">             </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Crear un DataFrame vacío</span>
+        <span class="n">df_dignidades</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="c1">#De la carpeta, buscar el archivo que empieza con &quot;dignidades&quot;</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;dignidades&quot;</span><span class="p">):</span>
+                        <span class="c1"># Construir el path del archivo</span>
+                        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="c1"># Leer el archivo en un DataFrame</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                        <span class="c1">#camabiar los nombres de las columnas para que no tengan caracteres especiales</span>
+                        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+                        <span class="c1">#Los nombres y ambitos de las dignidades están en mayúsculas y tienen tildes y ñ.</span>
+                        <span class="c1">#Vamos a mantenerlas en mayúsculas y vamos a quitarles los tildes y la ñ</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">,</span> <span class="s2">&quot;DIGNIDAD_AMBITO&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">,</span> <span class="s2">&quot;DIGNIDAD_AMBITO&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="c1">#añadir el año de la elección al DataFrame</span>
+                        <span class="n">año</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">año</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="c1"># Agregar el DataFrame al DataFrame vacío</span>
+                        <span class="n">df_dignidades</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_dignidades</span><span class="p">,</span> <span class="n">df</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">df_dignidades</span></div>
+
+    
+<div class="viewcode-block" id="Standard_Dictionaries.change_to_std_dignidades">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.change_to_std_dignidades">[documentos]</a>
+    <span class="k">def</span> <span class="nf">change_to_std_dignidades</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Cambia los nombres y códigos de las dignidades a los nombres y códigos estandarizados</span>
+<span class="sd">        </span>
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - df_dignidades: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de dignidades de las elecciones</span>
+<span class="sd">                </span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - df_dignidades: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de dignidades de las elecciones estandarizados    </span>
+<span class="sd">    </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="c1"># Antes del 2007, el codigo 3 es para los concejos provinciales</span>
+        <span class="n">dict_std_dignidades_pre_2007</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;DIGNIDAD_CODIGO&quot;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">],</span>
+                            <span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">:[</span><span class="s2">&quot;PRESIDENCIA&quot;</span><span class="p">,</span> <span class="s2">&quot;PREFECTURA&quot;</span><span class="p">,</span> <span class="s2">&quot;CONCEJO PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;ALCALDIA&quot;</span><span class="p">,</span> <span class="s2">&quot;CONCEJO URBANO&quot;</span><span class="p">,</span> <span class="s2">&quot;JUNTA PARROQUIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;ASAMBLEA PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PARLAMENTO ANDINO&quot;</span><span class="p">],</span>
+                             <span class="s2">&quot;DIGNIDAD_AMBITO&quot;</span><span class="p">:[</span><span class="s2">&quot;NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;CANTONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;CANTONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PARROQUIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;NACIONAL&quot;</span><span class="p">]}</span>
+        
+        
+        <span class="c1">#</span>
+        <span class="n">dict_std_dignidades_post_2007</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;DIGNIDAD_CODIGO&quot;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">],</span>
+                           <span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">:[</span><span class="s2">&quot;PRESIDENCIA&quot;</span><span class="p">,</span> <span class="s2">&quot;PREFECTURA&quot;</span><span class="p">,</span> <span class="s2">&quot;CONCEJO RURAL&quot;</span><span class="p">,</span> <span class="s2">&quot;ALCALDIA&quot;</span><span class="p">,</span> <span class="s2">&quot;CONCEJO URBANO&quot;</span><span class="p">,</span> <span class="s2">&quot;JUNTA PARROQUIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;ASAMBLEA PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PARLAMENTO ANDINO&quot;</span><span class="p">,</span> <span class="s2">&quot;ASAMBLEA NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;ASAMBLEA CIRCUNSCRIPCION&quot;</span><span class="p">,</span> <span class="s2">&quot;CPCCS M&quot;</span><span class="p">,</span> <span class="s2">&quot;CPCCS H&quot;</span><span class="p">,</span> <span class="s2">&quot;CPCCS NAC/EXT&quot;</span><span class="p">],</span>
+                            <span class="s2">&quot;DIGNIDAD_AMBITO&quot;</span><span class="p">:[</span><span class="s2">&quot;NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;CANTONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;CANTONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;CANTONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PARROQUIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;NACIONAL&quot;</span><span class="p">,</span> <span class="s2">&quot;NACIONAL&quot;</span><span class="p">]}</span>
+        
+        <span class="c1">#pd.DataFrame(dict_dignidades_std_post_2007).to_csv(&quot;data_csv/Codigos_estandar/dignidades/dignidades_std_post_2007.csv&quot;, index=False)</span>
+        <span class="c1">#pd.DataFrame(dict_dignidades_std_pre_2007).to_csv(&quot;data_csv/Codigos_estandar/dignidades/dignidades_std_pre_2007.csv&quot;, index=False)</span>
+        
+        <span class="c1"># Hay un problema en ciertos años. Los códigos de las dignidades no son los mismos que los del diccionario o que los nombres de las dignidades no son los mismos que los del diccionario</span>
+        <span class="c1"># Vamos a tener un diccionario de las equivalencias de los nombres de las dignidades</span>
+        <span class="c1"># Por ejemplo si el nombre de la dignidad es PRESIDENTA/E Y VICEPRESIDENTA/E o PRESIDENTE Y VICEPRESIDENTE vamos a cambiarlo a PRESIDENCIA</span>
+        <span class="c1"># Si el nombre de la dignidad es CONCEJALES RURALES vamos a cambiarlo a CONCEJO RURAL</span>
+        <span class="c1"># Si el nombre de la dignidad es ALCALDES o ALCALDE MUNICIPAL o ALCALDES MUNICIPALES o ALCANCESA/ALCALDE vamos a cambiarlo a ALCALDIA</span>
+        <span class="c1"># Si el nombre de la dignidad es CONCEJALES MUNICIPALES vamos a cambiarlo a CONCEJO MUNICIPAL</span>
+        
+        <span class="n">dict_equivalencias</span><span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;PRESIDENCIA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PRESIDENTA/E Y VICEPRESIDENTA/E&quot;</span><span class="p">,</span> <span class="s2">&quot;PRESIDENTE Y VICEPRESIDENTE&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;PREFECTURA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PREFECTA / PREFECTO&quot;</span><span class="p">,</span><span class="s2">&quot;PREFECTO PROVINCIAL&quot;</span><span class="p">,</span> <span class="s2">&quot;PREFECTO Y VICEPREFECTO&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;ALCALDIA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ALCALDES&quot;</span><span class="p">,</span> <span class="s2">&quot;ALCALDE MUNICIPAL&quot;</span><span class="p">,</span> <span class="s2">&quot;ALCALDES MUNICIPALES&quot;</span><span class="p">,</span> <span class="s2">&quot;ALCALDESA / ALCALDE&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;ASAMBLEA NACIONAL&quot;</span><span class="p">:[</span><span class="s2">&quot;ASAMBLEISTAS NACIONALES&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;ASAMBLEA PROVINCIAL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ASAMBLEISTAS PROVINCIALES&quot;</span><span class="p">,</span> <span class="s2">&quot;ASAMBLEISTAS PROVINCIALES Y DEL EXTERIOR&quot;</span><span class="p">,</span><span class="s2">&quot;DIPUTADOS PROVINCIALES&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;ASAMBLEA CIRCUNSCRIPCION&quot;</span><span class="p">:[</span><span class="s2">&quot;ASAMBLEISTAS POR CIRCUNSCRIPCION&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;CONCEJO URBANO&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CONCEJALES MUNICIPALES&quot;</span><span class="p">,</span> <span class="s2">&quot;CONCEJALES URBANOS&quot;</span><span class="p">,</span> <span class="s2">&quot;CONCEJAL MUNICIPAL&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;CONCEJO RURAL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CONCEJALES RURALES&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;CONCEJO PROVINCIAL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CONSEJEROS PROVINCIALES&quot;</span><span class="p">,</span><span class="s2">&quot;CONSEJERO PROVINCIAL&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;JUNTA PARROQUIAL&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;JUNTAS PARROQUIALES&quot;</span><span class="p">,</span><span class="s2">&quot;MIEMBROS JUNTAS PARROQUIALES&quot;</span><span class="p">,</span><span class="s2">&quot;VOCALES DE JUNTA PARROQUIAL&quot;</span><span class="p">,</span>
+                                        <span class="s2">&quot;VOCALES DE JUNTAS PARROQUIALES&quot;</span><span class="p">,</span><span class="s2">&quot;VOCALES JUNTAS PARROQUIALES&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;PARLAMENTO ANDINO&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;PARLAMENTARIOS ANDINOS&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;CPCCS M&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CPCCS (MUJERES)&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;CPCCS H&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CPCCS (HOMBRES)&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;CPCCS NAC/EXT&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CPCCS (NAC/EXT)&quot;</span><span class="p">]}</span>
+                    
+        <span class="c1"># # Find the maximum length among all lists</span>
+        <span class="c1"># max_length = max(len(lst) for lst in dict_equivalencias.values())</span>
+
+        <span class="c1"># # Fill shorter lists with NaN to make them equal length</span>
+        <span class="c1"># for key, value in dict_equivalencias.items():</span>
+        <span class="c1">#     dict_equivalencias[key] = value + [float(&#39;nan&#39;)] * (max_length - len(value))</span>
+
+        <span class="c1"># # Create a DataFrame</span>
+        <span class="c1"># df = pd.DataFrame.from_dict(dict_equivalencias, orient=&#39;index&#39;)</span>
+        <span class="c1"># df.T.to_csv(&quot;data_csv/Codigos_estandar/dignidades/equivalencias_dignidades_T.csv&quot;, index=True)</span>
+        
+        <span class="c1">#Vamos a cambiar los nombres de las dignidades</span>
+        <span class="c1">#Primero vamos a cambiar los nombres de las dignidades que no son los mismos que los del diccionario</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dict_equivalencias</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">]</span><span class="o">==</span><span class="n">v</span><span class="p">,</span> <span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+    
+        
+                
+        <span class="c1">#Si el año es antes del 2007, vamos a usar el diccionario de las dignidades antes del 2007</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2007</span><span class="p">:</span>
+            <span class="n">codigos_std</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dict_std_dignidades_pre_2007</span><span class="p">)</span>
+        <span class="c1"># Si el año es después del 2007, vamos a usar el diccionario de las dignidades después del 2007    </span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">codigos_std</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dict_std_dignidades_post_2007</span><span class="p">)</span>
+        
+        <span class="c1"># Vamos a hacer un left join con el DataFrame de las dignidades estandarizadas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">codigos_std</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;DIGNIDAD_NOMBRE&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="c1"># Y nos quedamos con los códigos estandarizados</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_CODIGO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_CODIGO_y&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_AMBITO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_AMBITO_x&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_CODIGO_OLD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_CODIGO_x&quot;</span><span class="p">]</span>
+        <span class="c1">#self.df_dignidades[&quot;DIGNIDAD_NOMBREs_OLD&quot;] = self.df_dignidades[&quot;DIGNIDAD_NOMBRE&quot;]</span>
+        <span class="c1"># Eliminamos las columnas que no necesitamos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_dignidades</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;DIGNIDAD_CODIGO_x&quot;</span><span class="p">,</span> <span class="s2">&quot;DIGNIDAD_CODIGO_y&quot;</span><span class="p">,</span><span class="s2">&quot;DIGNIDAD_AMBITO_x&quot;</span><span class="p">,</span><span class="s2">&quot;DIGNIDAD_AMBITO_y&quot;</span><span class="p">,</span> <span class="s2">&quot;ANIO&quot;</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="Standard_Dictionaries.recuperar_provincias">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.recuperar_provincias">[documentos]</a>
+    <span class="k">def</span> <span class="nf">recuperar_provincias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Recupera todas los diccionarios de provincias de las elecciones y coloca los en un dataframe</span>
+<span class="sd">        Se cambian las columnas para que no tengan caracteres especiales</span>
+<span class="sd">        </span>
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - input_folder: str </span>
+<span class="sd">                path al directorio que contiene los archivos .csv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - df_provincias: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de provincias de las elecciones</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        recuperar_provincias(&quot;data_csv&quot;)</span>
+<span class="sd">             </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Crear un DataFrame vacío</span>
+        <span class="n">df_provincias</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="c1">#De la carpeta, buscar el archivo que empieza con &quot;provincias&quot;</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;provincias&quot;</span><span class="p">):</span>
+                        <span class="c1"># Construir el path del archivo</span>
+                        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="c1"># Leer el archivo en un DataFrame</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                        <span class="c1">#camabiar los nombres de las columnas para que no tengan caracteres especiales</span>
+                        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+                        <span class="c1">#Los nombres de Provincias están en mayúsculas y tienen tildes y ñ.</span>
+                        <span class="c1">#Vamos a mantenerlas en mayúsculas y vamos a quitarles los tildes y la ñ</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;PROVINCIA_NOMBRE&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;PROVINCIA_NOMBRE&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                        
+                        <span class="c1">#añadir el año de la elección al DataFrame</span>
+                        <span class="n">año</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">año</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="c1"># Agregar el DataFrame al DataFrame vacío</span>
+                        <span class="n">df_provincias</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_provincias</span><span class="p">,</span> <span class="n">df</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">df_provincias</span></div>
+
+        
+<div class="viewcode-block" id="Standard_Dictionaries.change_to_std_provincias">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.change_to_std_provincias">[documentos]</a>
+    <span class="k">def</span> <span class="nf">change_to_std_provincias</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Cambia los nombres y códigos de las provincias a los nombres y códigos estandarizados</span>
+<span class="sd">        </span>
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - df_provincias: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de provincias de las elecciones</span>
+<span class="sd">                </span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - df_provincias: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de provincias de las elecciones estandarizados    </span>
+<span class="sd">    </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#Diccionario de nombres de provincias del exterior y sus equivalentes</span>
+        
+        <span class="c1">#self.load_std_data</span>
+        
+        <span class="n">dict_equivalencias_exterior</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;LATAM, CARIBE, AFRICA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;AMERICA LATINA, EL CARIBE Y AFRICA&quot;</span><span class="p">,</span> <span class="s2">&quot;AMERICA LATINA&quot;</span><span class="p">,</span> <span class="s2">&quot;AMERICA LATINA EL CARIBE Y AFRICA&quot;</span><span class="p">,</span><span class="s2">&quot;LATINOAMERICA, EL CARIBE Y AFRICA&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;NORTE-AMERICA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;CANADA Y ESTADOS UNIDOS&quot;</span><span class="p">,</span> <span class="s2">&quot;EE.UU CANADA&quot;</span><span class="p">,</span> <span class="s2">&quot;EEUU Y CANADA&quot;</span><span class="p">,</span> <span class="s2">&quot;EE.UU Y CANADA&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;EUROPA, ASIA, OCEANIA&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;EUROPA&quot;</span> <span class="p">,</span> <span class="s2">&quot;ASIA, OCEANIA&quot;</span><span class="p">,</span> <span class="s2">&quot;EUROPA ASIA OCEANIA&quot;</span><span class="p">,</span> <span class="s2">&quot;EUROPA, ASIA Y OCEANIA&quot;</span><span class="p">,</span><span class="s2">&quot;EUROPA ASIA Y OCEANIA&quot;</span><span class="p">,</span><span class="s2">&quot;EUROPA, OCEANIA Y ASIA&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;VOTO EXTERIOR&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;VOTO EXTERIOR&quot;</span><span class="p">],</span>
+            <span class="s2">&quot;ECUADOR&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;ECUADOR&quot;</span><span class="p">,</span><span class="s2">&quot;NACION&quot;</span><span class="p">]}</span>
+        <span class="c1">#fill the dictionary with NaN to make them equal length</span>
+        <span class="c1"># Find the maximum length among all lists</span>
+        <span class="c1"># max_length = max(len(lst) for lst in dict_equivalencias_exterior.values())</span>
+        <span class="c1"># # Fill shorter lists with NaN to make them equal length</span>
+        <span class="c1"># for key, value in dict_equivalencias_exterior.items():</span>
+        <span class="c1">#     dict_equivalencias_exterior[key] = value + [float(&#39;nan&#39;)] * (max_length - len(value))</span>
+        <span class="c1"># # Create a DataFrame   </span>
+        <span class="c1">#pd.DataFrame(dict_equivalencias_exterior).to_csv(&quot;data_csv/Codigos_estandar/provincias/equivalencias_exterior.csv&quot;, index=False)</span>
+        
+        <span class="n">dict_provincias</span><span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;PROVINCIA_CODIGO&quot;</span><span class="p">:[</span><span class="s2">&quot;P00&quot;</span><span class="p">,</span><span class="s2">&quot;P01&quot;</span><span class="p">,</span><span class="s2">&quot;P02&quot;</span><span class="p">,</span><span class="s2">&quot;P03&quot;</span><span class="p">,</span><span class="s2">&quot;P04&quot;</span><span class="p">,</span><span class="s2">&quot;P05&quot;</span><span class="p">,</span><span class="s2">&quot;P06&quot;</span><span class="p">,</span><span class="s2">&quot;P07&quot;</span><span class="p">,</span><span class="s2">&quot;P08&quot;</span><span class="p">,</span><span class="s2">&quot;P09&quot;</span><span class="p">,</span><span class="s2">&quot;P10&quot;</span><span class="p">,</span>
+                                               <span class="s2">&quot;P11&quot;</span><span class="p">,</span><span class="s2">&quot;P12&quot;</span><span class="p">,</span><span class="s2">&quot;P13&quot;</span><span class="p">,</span><span class="s2">&quot;P14&quot;</span><span class="p">,</span><span class="s2">&quot;P15&quot;</span><span class="p">,</span><span class="s2">&quot;P16&quot;</span><span class="p">,</span><span class="s2">&quot;P17&quot;</span><span class="p">,</span><span class="s2">&quot;P18&quot;</span><span class="p">,</span><span class="s2">&quot;P19&quot;</span><span class="p">,</span><span class="s2">&quot;P20&quot;</span><span class="p">,</span><span class="s2">&quot;P21&quot;</span><span class="p">,</span><span class="s2">&quot;P22&quot;</span><span class="p">,</span><span class="s2">&quot;P23&quot;</span><span class="p">,</span><span class="s2">&quot;P24&quot;</span><span class="p">,</span><span class="s2">&quot;P25&quot;</span><span class="p">,</span><span class="s2">&quot;P26&quot;</span><span class="p">,</span><span class="s2">&quot;P27&quot;</span><span class="p">,</span><span class="s2">&quot;P28&quot;</span><span class="p">],</span>
+                           <span class="s2">&quot;PROVINCIA_NOMBRE&quot;</span><span class="p">:[</span><span class="s2">&quot;ECUADOR&quot;</span><span class="p">,</span><span class="s2">&quot;AZUAY&quot;</span><span class="p">,</span> <span class="s2">&quot;BOLIVAR&quot;</span><span class="p">,</span> <span class="s2">&quot;CANAR&quot;</span><span class="p">,</span> <span class="s2">&quot;CARCHI&quot;</span><span class="p">,</span> <span class="s2">&quot;COTOPAXI&quot;</span><span class="p">,</span> <span class="s2">&quot;CHIMBORAZO&quot;</span><span class="p">,</span> <span class="s2">&quot;EL ORO&quot;</span><span class="p">,</span> <span class="s2">&quot;ESMERALDAS&quot;</span><span class="p">,</span> <span class="s2">&quot;GUAYAS&quot;</span><span class="p">,</span> <span class="s2">&quot;IMBABURA&quot;</span><span class="p">,</span>
+                                               <span class="s2">&quot;LOJA&quot;</span><span class="p">,</span> <span class="s2">&quot;LOS RIOS&quot;</span><span class="p">,</span> <span class="s2">&quot;MANABI&quot;</span><span class="p">,</span> <span class="s2">&quot;MORONA SANTIAGO&quot;</span><span class="p">,</span> <span class="s2">&quot;NAPO&quot;</span><span class="p">,</span> <span class="s2">&quot;PASTAZA&quot;</span><span class="p">,</span> <span class="s2">&quot;PICHINCHA&quot;</span><span class="p">,</span> <span class="s2">&quot;TUNGURAHUA&quot;</span><span class="p">,</span> <span class="s2">&quot;ZAMORA CHINCHIPE&quot;</span><span class="p">,</span> <span class="s2">&quot;GALAPAGOS&quot;</span><span class="p">,</span> <span class="s2">&quot;SUCUMBIOS&quot;</span><span class="p">,</span> <span class="s2">&quot;ORELLANA&quot;</span><span class="p">,</span> <span class="s2">&quot;STO DGO TSACHILAS&quot;</span><span class="p">,</span> <span class="s2">&quot;SANTA ELENA&quot;</span><span class="p">,</span> <span class="s2">&quot;VOTO EXTERIOR&quot;</span><span class="p">,</span><span class="s2">&quot;EUROPA, ASIA, OCEANIA&quot;</span><span class="p">,</span><span class="s2">&quot;NORTE-AMERICA&quot;</span><span class="p">,</span><span class="s2">&quot;LATAM, CARIBE, AFRICA&quot;</span><span class="p">],</span>
+                           <span class="s2">&quot;PROVINCIA_CODIGO_OLD&quot;</span><span class="p">:[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>
+                                                   <span class="mi">11</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">17</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">21</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">26</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">28</span><span class="p">]}</span>      
+        
+        <span class="c1">#pd.DataFrame(dict_provincias).to_csv(&quot;data_csv/Codigos_estandar/provincias/provincias_std.csv&quot;, index=False)</span>
+        
+        <span class="c1">#Vamos a cambiar los nombres de las dignidades</span>
+        <span class="c1">#Primero vamos a cambiar los nombres de las dignidades que no son los mismos que los del diccionario</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dict_equivalencias_exterior</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="p">[</span><span class="s2">&quot;PROVINCIA_NOMBRE&quot;</span><span class="p">]</span><span class="o">==</span><span class="n">v</span><span class="p">,</span> <span class="s2">&quot;PROVINCIA_NOMBRE&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">key</span>
+        
+        <span class="c1"># Vamos a hacer un left join con el DataFrame de las provincias estandarizadas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dict_provincias</span><span class="p">),</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;PROVINCIA_NOMBRE&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="c1"># Y nos quedamos con los códigos estandarizados</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="p">[</span><span class="s2">&quot;PROVINCIA_CODIGO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="p">[</span><span class="s2">&quot;PROVINCIA_CODIGO_y&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="p">[</span><span class="s2">&quot;PROVINCIA_CODIGO_OLD&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="p">[</span><span class="s2">&quot;PROVINCIA_CODIGO_x&quot;</span><span class="p">]</span>
+        <span class="c1"># Eliminamos las columnas que no necesitamos</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_provincias</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;PROVINCIA_CODIGO_x&quot;</span><span class="p">,</span> <span class="s2">&quot;PROVINCIA_CODIGO_y&quot;</span><span class="p">,</span> <span class="s2">&quot;ANIO&quot;</span><span class="p">])</span></div>
+
+        <span class="c1">#print(self.df_provincias)</span>
+        
+<div class="viewcode-block" id="Standard_Dictionaries.recuperar_cantones">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.recuperar_cantones">[documentos]</a>
+    <span class="k">def</span> <span class="nf">recuperar_cantones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Recupera todas los diccionarios de cantones de las elecciones y coloca los en un dataframe</span>
+<span class="sd">        Se cambian las columnas para que no tengan caracteres especiales</span>
+<span class="sd">        </span>
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - input_folder: str </span>
+<span class="sd">                path al directorio que contiene los archivos .csv</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - df_cantones: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de cantones de las elecciones</span>
+<span class="sd">        </span>
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        recuperar_cantones(&quot;data_csv&quot;)</span>
+<span class="sd">             </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Crear un DataFrame vacío</span>
+        <span class="n">df_cantones</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="c1">#De la carpeta, buscar el archivo que empieza con &quot;cantones&quot;</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.csv&quot;</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;cantones&quot;</span><span class="p">):</span>
+                        <span class="c1"># Construir el path del archivo</span>
+                        <span class="n">file_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="c1"># Leer el archivo en un DataFrame</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span>
+                        <span class="c1">#camabiar los nombres de las columnas para que no tengan caracteres especiales</span>
+                        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+                        <span class="c1">#Los nombres de Cantones están en mayúsculas y tienen tildes y ñ.</span>
+                        <span class="c1">#Vamos a mantenerlas en mayúsculas y vamos a quitarles los tildes y la ñ</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CANTON_NOMBRE&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">unidecode</span><span class="o">.</span><span class="n">unidecode</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;CANTON_NOMBRE&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">x</span><span class="p">)</span>
+                        <span class="c1">#añadir el año de la elección al DataFrame</span>
+                        <span class="n">año</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d+&#39;</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">año</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="c1"># Agregar el DataFrame al DataFrame vacío</span>
+                        <span class="n">df_cantones</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df_cantones</span><span class="p">,</span> <span class="n">df</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">df_cantones</span>    </div>
+
+    
+<div class="viewcode-block" id="Standard_Dictionaries.change_to_std_cantones">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.change_to_std_cantones">[documentos]</a>
+    <span class="k">def</span> <span class="nf">change_to_std_cantones</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">        Cambia los nombres y códigos de los cantones a los nombres y códigos estandarizados</span>
+<span class="sd">        </span>
+<span class="sd">        Paramaters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            - df_cantones: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de cantones de las elecciones</span>
+<span class="sd">                </span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            - df_cantones: DataFrame</span>
+<span class="sd">                DataFrame con los códigos de cantones de las elecciones estandarizados    </span>
+<span class="sd">    </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1"># Si el año es antes del 2009 y después del 2023, vamos a usar el diccionario de los cantones antes del 2009</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">2009</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">2013</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">load_std_data</span><span class="p">(</span><span class="s2">&quot;cantones/std_cantones.csv&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">load_std_data</span><span class="p">(</span><span class="s2">&quot;cantones/std_cantones_2009_2013.csv&quot;</span><span class="p">)</span>
+        <span class="c1"># Vamos a hacer un left join con el DataFrame de los cantones estandarizados</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">left_on</span><span class="o">=</span><span class="s2">&quot;CANTON_CODIGO&quot;</span><span class="p">,</span><span class="n">right_on</span><span class="o">=</span><span class="s2">&quot;CANTON_CODIGO_OLD&quot;</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">)</span>
+        <span class="c1">#quitar las columnas que no necesitamos</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_x&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+        <span class="c1">#drop Anio, caambiar y renombrar las columnas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;ANIO&quot;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_y&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">col</span><span class="p">:</span><span class="n">col</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]})</span>
+                
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_cantones</span></div>
+
+        
+        
+                                         
+
+<div class="viewcode-block" id="Standard_Dictionaries.test">
+<a class="viewcode-back" href="../../../open_elec.std_data.html#open_elec.std_data.create_std_dicts.Standard_Dictionaries.test">[documentos]</a>
+    <span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+        <span class="k">pass</span></div>
+</div>
+
+        <span class="c1">#Test del metodo para el año 2013</span>
+        
+        <span class="c1">#print(std_dicts.df_dignidades)</span>
+        <span class="c1">#std_dicts.change_to_std_dignidades()</span>
+        <span class="c1">#print(std_dicts.df_dignidades)</span>
+        
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">input_folder</span> <span class="o">=</span> <span class="s2">&quot;data_csv/seccionales/2014/diccionarios&quot;</span>
+    <span class="n">std_dicts</span> <span class="o">=</span> <span class="n">Standard_Dictionaries</span><span class="p">(</span><span class="n">input_folder</span><span class="p">)</span>
+    <span class="c1"># print(std_dicts.df_provincias)</span>
+    <span class="c1"># std_dicts.change_to_std_provincias()</span>
+    <span class="c1"># print(std_dicts.df_provincias)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">std_dicts</span><span class="o">.</span><span class="n">df_cantones</span><span class="p">)</span>
+    <span class="n">std_dicts</span><span class="o">.</span><span class="n">change_to_std_cantones</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">std_dicts</span><span class="o">.</span><span class="n">df_cantones</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">Open-ELEC</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navegación</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Código de módulo</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Búsqueda rápida</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Ir a" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024, Kristian Mendoza.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 7.2.6</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 0.7.16</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>
