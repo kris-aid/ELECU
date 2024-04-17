@@ -429,15 +429,20 @@ def recuperar_info(input_folder,dictionary_to_use, columns_to_preserve, column_t
                     file_path = os.path.join(root, file)
                     # Leer el archivo en un DataFrame
                     print(file_path)
-                    df = pd.read_csv(file_path)
+                    df = pd.read_csv(file_path,low_memory=False)
                     #camabiar los nombres de las columnas para que no tengan caracteres especiales
                     df.columns = [unidecode.unidecode(col) for col in df.columns]
+                    #el valor de las columnas deben ser strings
+                    df = df.map(str)
+                    
                     #if the df has NaN values, replace them with a string "SIN INFORMACION"
                     df.fillna("SIN INFORMACION", inplace=True)
+                    
                     #Los nombres y ambitos de las dignidades están en mayúsculas y tienen tildes y ñ.
                     #Vamos a mantenerlas en mayúsculas y vamos a quitarles los tildes y la ñ
                     df = df.apply(lambda x: x.str.upper() if x.name in columns_to_preserve else x)
                     df = df.apply(lambda x: x.apply(unidecode.unidecode) if x.name in columns_to_preserve else x)
+                    
                     
                     #drop columns that are not in columns_to_preserve and are not the column to study
                     columns_to_drop = [col for col in df.columns if col not in columns_to_preserve and col != column_to_study]
@@ -448,6 +453,7 @@ def recuperar_info(input_folder,dictionary_to_use, columns_to_preserve, column_t
                     df["ANIO"] = año[0]
                     # Agregar el DataFrame al DataFrame vacío
                     df_info = pd.concat([df_info, df])
+    df_info.fillna("SIN INFORMACION", inplace=True)                
     return df_info
 
 def crear_df_info(df_info, column_to_study, column_to_use):
@@ -501,7 +507,9 @@ def crear_df_info(df_info, column_to_study, column_to_use):
 # print(df_cantones_provincia_codigo_std)
 # df_cantones_provincia_codigo_std.to_csv("data_csv/Codigos_estandar/codigo_vs_canton.csv", index=True, header=True)
 
-
+# df_candidatos_nombre_anio=recuperar_info(input_folder, "candidatos", ["CANDIDATO_NOMBRE","CANDIDATO_EDAD","DIGNIDAD_CODIGO","DIGNIDAD_NOMBRE"],"CANDIDATO_CODIGO")
+# print(df_candidatos_nombre_anio)
+# df_candidatos_nombre_anio.to_csv("data_csv/Codigos_estandar/candidatos/1_candidatos_nombre_anio.csv", index=False, header=True)
 # df_parroquias_codigo=recuperar_info(input_folder, "parroquias", ["PARROQUIA_NOMBRE"],"CANTON_NOMBRE")
 # print(df_parroquias_codigo)
 # df_parroquias_codigo_std=crear_df_info(df_parroquias_codigo, "PARROQUIA_NOMBRE", "CANON_NOMBRE")
@@ -514,16 +522,22 @@ def crear_df_info(df_info, column_to_study, column_to_use):
 # df_candidatos_std=crear_df_info(df_candidatos, "CANDIDATO_NOMBRE", "CANDIDATO_CODIGO")
 # df_candidatos_std.to_csv("data_csv/Codigos_estandar/candidatos/candidatos_matrix.csv")
 
-# df_organizaciones=recuperar_info(input_folder,"organizaciones_politicas", ["OP_SIGLAS","OP_AMBITO"],"OP_LISTA")
+# df_organizaciones=recuperar_info(input_folder,"organizaciones_politicas", ["OP_NOMBRE","OP_AMBITO","OP_SIGLAS"],"OP_SIGLA")
 # print(df_organizaciones)
-# df_organizaciones.to_csv("data_csv/Codigos_estandar/organizaciones/1_organizaciones.csv", index=True, header=True)
-# df_organizaciones_std=crear_df_info(df_organizaciones, "OP_SIGLAS", "OP_LISTA")
-# df_organizaciones_std.to_csv("data_csv/Codigos_estandar/organizaciones/organizaciones_matrix.csv")
+# df_organizaciones.to_csv("data_csv/Codigos_estandar/organizaciones/2_organizaciones.csv", index=True, header=True)
+# df_organizaciones_std=crear_df_info(df_organizaciones, "OP_SIGLAS", "OP_NOMBRE")
+# df_organizaciones_std.to_csv("data_csv/Codigos_estandar/organizaciones/2_organizaciones_matrix.csv")
 
 
 def extract_unique_values_results(input_file,columnas_a_considerar):
     extracted_values = []
     df = pd.read_csv(input_file)
+    # Using nunique() method
+    num_unique_values = df['PARROQUIA_CODIGO'].nunique()
+    #extraer dataframe con DIGNIDAD_CODIGO=6.0
+    df_vocales = df[df['DIGNIDAD_CODIGO'] == 6.0]
+    num_unique_values_6 = df_vocales['PARROQUIA_CODIGO'].nunique()
+    print("Number of unique values in the column:", num_unique_values_6)
     # Columnas a considerar para identificar filas duplicadas
     print(df)
    # df.sort_values(by=columnas_a_considerar)
@@ -531,17 +545,19 @@ def extract_unique_values_results(input_file,columnas_a_considerar):
     # Filtrar filas duplicadas basadas en las columnas especificadas
     df_filtrado= df.drop_duplicates(subset=columnas_a_considerar, keep='first')
     #ordenar
-    df_filtrado.sort_values(by=columnas_a_considerar, inplace=True)
-    print(df_filtrado)
-    
-    
-    
+    #df_filtrado.sort_values(by=columnas_a_considerar, inplace=True)
+    #print(df_filtrado)
     df_filtrado.to_csv("data_csv/Codigos_estandar/resultados/resultados_duplicados_sec_2019.csv", index=False)
     # Mostrar el resultado
     return df_filtrado
 columnas_a_considerar = ['DIGNIDAD_CODIGO', 'PROVINCIA_CODIGO', 'CANTON_CODIGO', 'CIRCUNSCRIPCION_CODIGO', 'PARROQUIA_CODIGO', 'BLANCOS', 'NULOS', 'JUNTA_SEXO']
+columnas_duplicated=['PARROQUIA_CODIGO', 'BLANCOS', 'NULOS', 'JUNTA_SEXO',]
+df_filtrado_1=extract_unique_values_results("data_csv/seccionales/2019/resultados/resultados_2019_v_1.csv",columnas_duplicated)
 df_filtrado=extract_unique_values_results("data_csv/seccionales/2019/resultados/resultados_2019_v_1.csv",columnas_a_considerar)
+#print(df_filtrado_1)
+#print(df_filtrado)
 
+#print(df_filtrado.columns)
 def assign_unique_identifier(columnas_a_considerar, df):
     '''
     Asigna un identificador único a cada fila del DataFrame basado en las columnas especificadas.
@@ -565,15 +581,29 @@ def assign_unique_identifier(columnas_a_considerar, df):
     # Crear un identificador único basado en la columna de Parroquia
     df['ID'] = df["PARROQUIA_CODIGO"].astype(str) + "_"+ df["JUNTA_SEXO"].astype(str)
     # drop the columns that are not the considered columns
-    columns_to_drop = [col for col in df.columns if col not in columnas_a_considerar and col != "ID" and col != "SUFRAGANTES"]
+    
+    columns_to_drop = [col for col in df.columns if col not in columnas_a_considerar and col != "ID" and col != "SUFRAGANTES" and col != "CICUNSCRIPCION_NOMBRE"]
     df_con_id = df.drop(columns_to_drop, axis=1)
     #colocar la columna ID al principio
     df_con_id = df_con_id[['ID'] + [col for col in df_con_id.columns if (col != 'ID')]]
     return df_con_id
 
 df_con_id = assign_unique_identifier(columnas_a_considerar, df_filtrado)
-df_con_id.to_csv("data_csv/Codigos_estandar/resultados/resultados_2019_sec_v_1_con_id.csv", index=False)
+#df_con_id.to_csv("data_csv/Codigos_estandar/resultados/resultados_2019_sec_v_1_con_id.csv", index=False)
 #find the row that match the PARROQUIA_NOMBRE
+
+#conservar:
+#DIGNIDAD_CODIGO,PARROQUIA_CODIGO,CIRUSCRIPCION_CODIGO,JUNTA_SEXO,BLANCOS,NULOS,SUFRAGANTES
+
+conservar=['DIGNIDAD_CODIGO', 'CIRCUNSCRIPCION_CODIGO','CICUNSCRIPCION_NOMBRE', 'PARROQUIA_CODIGO','JUNTA_SEXO', 'BLANCOS', 'NULOS', 'SUFRAGANTES', 'ID']
+
+#drop other columns
+df_con_id = df_con_id[conservar]
+df_con_id.sort_values(by=["ID",'DIGNIDAD_CODIGO'], inplace=True)
+
+#print(df_con_id)
+
+
 def find_row(df, column, value):
     '''
     Encuentra la fila en un DataFrame que coincide con un valor específico en una columna.
@@ -599,4 +629,15 @@ def find_row(df, column, value):
     rows = df[df[column] == value]
     return rows
 
-print(find_row(df_filtrado, 'PARROQUIA_NOMBRE', 'COMITE DEL PUEBLO'))
+#Extract the the rows of the same DIGNIDAD_CODIGO
+df_1=find_row(df_con_id, 'JUNTA_SEXO', 'F')
+
+print(df_1)
+df2=find_row(df_1,'DIGNIDAD_CODIGO', 6.0 )
+print(df2)
+
+
+#df_1=find_row(df_filtrado, 'PARROQUIA_NOMBRE', 'COMITE DEL PUEBLO')
+
+#df_2=find_row(df_filtrado, 'ID', '7150.0_F')
+#print(df_2)
