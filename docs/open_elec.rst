@@ -7,7 +7,7 @@ Subpackages
 .. toctree::
    :maxdepth: 4
 
-   open_elec.std_data
+   open_elec.standarize_data
 
 Module contents
 ---------------
