@@ -30,7 +30,8 @@ class Standarized_Results:
         
         self.input_folder = input_folder   
         self.df_registro = self.recuperar_registro()
-        self.df_resultados = self.recuperar_resultados()     
+        self.df_resultados = self.recuperar_resultados()   
+          
         
     def load_std_data(self,file):
         '''
@@ -57,7 +58,34 @@ class Standarized_Results:
         print(file_path)
         df = pd.read_csv(file_path)
         return df
+    
+    def create_dict_mapping(self,df):
+        '''
+        Crea un diccionario de mapeo a partir de un DataFrame.
         
+        Parameters
+        ----------
+            - df: pd.DataFrame
+                DataFrame con varias columnas. La primera columna es el estandar y las demás columnas son equivalentes.
+        
+        Returns
+        -------
+            - mapping_dict: dict
+                Diccionario con el mapeo de las columnas del DataFrame.
+            '''
+        # Initialize an empty dictionary to store the mapping
+        mapping_dict = {}
+
+        # Iterate over the columns of the DataFrame excluding the first one
+        for column in df.columns[1:]:
+            # Iterate over the rows of the DataFrame
+            for index, row in df.iterrows():
+                # If the value in the current cell is not "No especificado"
+                if row[column] != "No especificado" or row[column] != None:
+                    # Use the value in the first column as the key and the value in the current column as the value in the dictionary
+                    mapping_dict[row[column]] = row[0]
+
+        return mapping_dict
     
     def recuperar_registro(self):
         '''
@@ -117,27 +145,14 @@ class Standarized_Results:
         
         # Now for the SEXO column we want to change the values based on the sexo_names_std in the standarized folder
         df_sexo_names = self.load_std_data("registro_electoral/sexo_names_std.csv")
-    
-        # retrieve the values of each row in the df_sexo_names as a list
-        for _, row_eq in df_sexo_names.iterrows():
-            row_eq=row_eq.values.tolist()
-            
-            for index, row in self.df_registro.iterrows():
-                sexo=row['SEXO']
-                if sexo in row_eq:
-                    #print(sexo)
-                    self.df_registro.at[index,'SEXO']=row_eq[0]
+        sexo_mapping=self.create_dict_mapping(df_sexo_names)
+        self.df_registro['SEXO'] = self.df_registro['SEXO'].map(sexo_mapping)
+        
+        
         df_electores_names = self.load_std_data("registro_electoral/electores_names_std.csv")
-        
-        for _, row_eq in df_electores_names.iterrows():
-            row_eq=row_eq.values.tolist()
-            
-            for index, row in self.df_registro.iterrows():
-                elector=row['G_EDAD']
-                if elector in row_eq:
-                    #print(elector)
-                    self.df_registro.at[index,'G_EDAD']=row_eq[0]
-        
+        electores_mapping=self.create_dict_mapping(df_electores_names)
+        self.df_registro['ELECTORES'] = self.df_registro['ELECTORES'].map(electores_mapping)
+        #drop columns if they are present
         self.df_registro.drop("ANIO", axis=1, inplace=True)
         
         #Now we want to pivot the table. All the columns will be the same except G_EDAD y ELECTORES
@@ -159,6 +174,11 @@ class Standarized_Results:
     def recuperar_resultados(self):
         '''
         Recupera los resultados de los archivos de resultados.
+        
+        Returns
+        -------
+            - df_resultados: pd.DataFrame
+                DataFrame con los resultados de los archivos de resultados raw
         '''
         df_resultados = pd.DataFrame()
         for root, dirs, files in os.walk(self.input_folder):
@@ -178,7 +198,14 @@ class Standarized_Results:
     def change_resultados(self):
         '''
         Cambia los resultados de los archivos de resultados.
+        
+        Returns
+        -------
+            - df_resultados: pd.DataFrame
+                DataFrame con los resultados de los archivos de resultados estandarizados
+                
         '''
+        anio=self.input_folder[-4:]
         # Cambiar el nombre de las columnas
         self.df_resultados.columns = [unidecode.unidecode(col) for col in self.df_resultados.columns]
 
@@ -192,12 +219,6 @@ class Standarized_Results:
         self.df_resultados['SEXO'] = self.df_resultados['SEXO'].astype(str)
         
         
-        # Colocar el nombre correcto de las columnas de la circunscripcion
-        if 'CIRCUSCRIPCION_CODIGO_ORIGINAL' in self.df_resultados.columns:
-            self.df_resultados.rename(columns={'CIRCUSCRIPCION_CODIGO_ORIGINAL': 'CIRCUNSCRIPCION_CODIGO'}, inplace=True)
-        else:
-            pass
-        
         # Colocar el nombre correcto de las columnas de blancos y nulos
         if "VOTOS_EN_BLANCO" in self.df_resultados.columns:
             self.df_resultados.rename(columns={'VOTOS_EN_BLANCO': 'BLANCOS'}, inplace=True)
@@ -210,8 +231,8 @@ class Standarized_Results:
             pass
         
         # colocar el nombre del codigo de candidato
-        if 'CODIGO_CANDIDATO_RESULTADO' in self.df_resultados.columns:
-            self.df_resultados.rename(columns={'CODIGO_CANDIDATO_RESULTADO': 'CODIGO_CANDIDATO'}, inplace=True)
+        if 'CANDIDATO_CODIGO_RESULTADOS' in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'CANDIDATO_CODIGO_RESULTADOS': 'CANDIDATO_CODIGO'}, inplace=True)
         else:
             pass
         # Colocar el nombre de la columna de votos
@@ -220,7 +241,7 @@ class Standarized_Results:
         elif 'CANDIDATO_VOTOS' in self.df_resultados.columns:
             self.df_resultados.rename(columns={'CANDIDATO_VOTOS': 'VOTOS'}, inplace=True)
         
-        rows_to_preserve = ["PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO"]
+        
         
         #drop columns if they are present
         if 'NUMERO_DE_ACTAS' in self.df_resultados.columns:
@@ -230,29 +251,111 @@ class Standarized_Results:
         if 'CANDIDATO_ESTADO' in self.df_resultados.columns:
             self.df_resultados.drop("CANDIDATO_ESTADO", axis=1, inplace=True)
         
-        # preserve the columns if they are present
-        if 'OP_VOTO_EN_PLANCHA' in self.df_resultados.columns:
-            rows_to_preserve.append('OP_VOTO_EN_PLANCHA')
-        
-        if 'CIRCUNSCRIPCION_CODIGO' in self.df_resultados.columns:
-            rows_to_preserve.append('CIRCUNSCRIPCION_CODIGO')
-        if 'CIRCUNSCRIPCION_NOMBRE' in self.df_resultados.columns:
-            rows_to_preserve.append('CIRCUNSCRIPCION_NOMBRE')
-        if 'SUFRAGANTES' in self.df_resultados.columns:
-            rows_to_preserve.append('SUFRAGANTES')
-            
-        # Now for the SEXO column we want to change the values based on the sexo_names_std in the standarized folder
         df_sexo_names = self.load_std_data("resultados/sexo_names_std.csv")
-        # retrieve the values of each row in the df_sexo_names as a list
-        for _, row_eq in df_sexo_names.iterrows():
-            row_eq=row_eq.values.tolist()
-            
-            for index, row in self.df_resultados.iterrows():
-                sexo=row['SEXO']
-                if sexo in row_eq:
-                    #print(sexo)
-                    self.df_resultados.at[index,'SEXO']=row_eq[0]
         
+        sex_mapping = self.create_dict_mapping(df_sexo_names)
+        
+        self.df_resultados['SEXO'] = self.df_resultados['SEXO'].map(sex_mapping) 
+
+        
+        
+        if int(anio) < 2007:
+            df_dignidades_codes = self.load_std_data("dignidades/std_dignidades_pre_2007.csv")
+        else:
+            df_dignidades_codes = self.load_std_data("dignidades/std_dignidades_post_2007.csv")
+        
+        if "DIGNIDAD_NOMBRE" not in self.df_resultados.columns:
+            #the anio is the last 4 characters of the input_folder
+            anio = self.input_folder[-4:]
+            path_diccionario_dignidades = self.input_folder + "/diccionarios/dignidades_"+anio+".csv"
+            df_diccionario_dignidades = pd.read_csv(path_diccionario_dignidades)
+            #Colocar el nombre de la dignidad
+            self.df_resultados = pd.merge(self.df_resultados, df_diccionario_dignidades, on="DIGNIDAD_CODIGO", how="left")
+            self.df_resultados.drop("DIGNIDAD_AMBITO", axis=1, inplace=True)
+            
+        #unidecode the dignidad_nombre column
+        
+        self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].apply(unidecode.unidecode)  
+        df_dignidades_names = self.load_std_data("dignidades/equivalencias_dignidades.csv")
+        # retrieve the values of each row in the df_sexo_names as a list
+        
+        
+        map_dignidades =self.create_dict_mapping(df_dignidades_names)
+        #print(map_dignidades)
+        self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].map(map_dignidades)
+        # for _, row_eq in df_dignidades_names.iterrows():
+        #     row_eq=row_eq.values.tolist()
+            
+        #     for index, row in self.df_resultados.iterrows():
+        #         dignidad=row['DIGNIDAD_NOMBRE']
+        #         if dignidad in row_eq:
+        #             #print(sexo)
+        #             self.df_resultados.at[index,'DIGNIDAD_NOMBRE']=row_eq[0]
+
+        if "DIGNIDAD_CODIGO" not in self.df_resultados.columns:
+            #create the column DIGNIDAD_CODIGO
+            self.df_resultados["DIGNIDAD_CODIGO"] = np.nan
+            # put it on the beginning of the columns
+            self.df_resultados = self.df_resultados[["DIGNIDAD_CODIGO"]+[col for col in self.df_resultados.columns if col != "DIGNIDAD_CODIGO"]]
+            
+        # en df_dignidades_codes se encuentran los códigos de las dignidades, hacer un merge con el DataFrame de resultados
+        self.df_resultados = pd.merge(self.df_resultados, df_dignidades_codes, on="DIGNIDAD_NOMBRE", how="left")
+        self.df_resultados.drop("DIGNIDAD_AMBITO", axis=1, inplace=True)
+        self.df_resultados.drop("DIGNIDAD_CODIGO_x", axis=1, inplace=True)
+        self.df_resultados.rename(columns={'DIGNIDAD_CODIGO_y': 'DIGNIDAD_CODIGO'}, inplace=True)         
+        return self.df_resultados
+    def divide_resultados(self):
+        '''
+        Divide los resultados en dos DataFrames: uno con los resultados de la votación y otro con la elección de candidatos.
+        
+        Returns
+        -------
+            - df_votacion: pd.DataFrame
+                DataFrame con los resultados de la votación.
+            - df_eleccion: pd.DataFrame
+                DataFrame con la elección de candidatos.
+        
+        '''
+        # se va a utilizar las columnas de la tabla de resultados para dividir en dos DataFrames 
+        columnas_de_votacion = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", 'BLANCOS', 'NULOS','ANIO']
+        columnas_de_eleccion = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VOTOS", 'ANIO']
+        # preserve the columns if they are present
+        if 'SUFRAGANTES' in self.df_resultados.columns:
+            columnas_de_votacion.append('SUFRAGANTES')
+            
+        if 'OP_VOTOS_EN_PLANCHA' in self.df_resultados.columns:
+            columnas_de_eleccion.append('OP_VOTOS_EN_PLANCHA')
+            
+        if 'CIRCUNSCRIPCION_CODIGO' in self.df_resultados.columns:
+            columnas_de_votacion.append('CIRCUNSCRIPCION_CODIGO')
+            columnas_de_eleccion.append('CIRCUNSCRIPCION_CODIGO')
+            
+        if 'CIRCUNSCRIPCION_NOMBRE' in self.df_resultados.columns:
+            columnas_de_votacion.append('CIRCUNSCRIPCION_NOMBRE')
+            columnas_de_eleccion.append('CIRCUNSCRIPCION_NOMBRE')
+            
+        if 'CANDIDATO_CODIGO' in self.df_resultados.columns:
+            columnas_de_eleccion.append('CANDIDATO_CODIGO')
+        if 'CANDIDATO_NOMBRE' in self.df_resultados.columns:
+            columnas_de_eleccion.append('CANDIDATO_NOMBRE')
+        if 'OP_CODIGO' in self.df_resultados.columns:
+            columnas_de_eleccion.append('OP_CODIGO')
+        if 'OP_NOMBRE' in self.df_resultados.columns:
+            columnas_de_eleccion.append('OP_NOMBRE')
+        if 'OP_LISTA' in self.df_resultados.columns:
+            columnas_de_eleccion.append('OP_LISTA')
+        if 'OP_SIGLAS' in self.df_resultados.columns:
+            columnas_de_eleccion.append('OP_SIGLAS')
+            
+        
+        df_votacion= self.df_resultados[columnas_de_votacion].copy()
+        df_votacion= df_votacion.drop_duplicates(subset=columnas_de_votacion, keep='first')
+        df_eleccion = self.df_resultados.copy()
+        # in df_eleccion we want to drop the columns that are in columnas_de_votacion and are not in columnas_de_eleccion
+        columnas_no_ele = [col for col in df_eleccion.columns if col not in columnas_de_eleccion]
+        print(columnas_no_ele)
+        df_eleccion = df_eleccion.drop(columns=columnas_no_ele)
+        return df_votacion, df_eleccion
         
         
 if __name__ == "__main__":
@@ -262,7 +365,13 @@ if __name__ == "__main__":
     os.chdir(current_directory)
     print(current_directory)
     #D:\Open-ELEC\data_csv\seccionales\2014\diccionarios
-    input_folder = "../../../data_csv/generales/2021"
+    input_folder = "../../../data_csv/generales/2006"
     standarized_folder = "../data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
     print(standarized_results.df_resultados)
+    test=standarized_results.change_resultados()
+    test.to_csv("../../../tests/test_results/test_2006.csv", index=False)
+    test_2021_votacion, test_2021_eleccion = standarized_results.divide_resultados()
+    test_2021_votacion.to_csv("../../../tests/test_results/test_2006_votacion.csv", index=False)
+    test_2021_eleccion.to_csv("../../../tests/test_results/test_2006_eleccion.csv", index=False)
+    
