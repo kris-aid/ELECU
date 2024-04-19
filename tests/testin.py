@@ -547,12 +547,12 @@ def extract_unique_values_results(input_file,columnas_a_considerar):
     #ordenar
     #df_filtrado.sort_values(by=columnas_a_considerar, inplace=True)
     #print(df_filtrado)
-    df_filtrado.to_csv("data_csv/Codigos_estandar/resultados/resultados_duplicados_sec_2019.csv", index=False)
+    #df_filtrado.to_csv("data_csv/Codigos_estandar/resultados/resultados_duplicados_sec_2019.csv", index=False)
     # Mostrar el resultado
     return df_filtrado
 columnas_a_considerar = ['DIGNIDAD_CODIGO', 'PROVINCIA_CODIGO', 'CANTON_CODIGO', 'CIRCUNSCRIPCION_CODIGO', 'PARROQUIA_CODIGO', 'BLANCOS', 'NULOS', 'JUNTA_SEXO']
-columnas_duplicated=['PARROQUIA_CODIGO', 'BLANCOS', 'NULOS', 'JUNTA_SEXO',]
-df_filtrado_1=extract_unique_values_results("data_csv/seccionales/2019/resultados/resultados_2019_v_1.csv",columnas_duplicated)
+#columnas_duplicated=['PARROQUIA_CODIGO', 'BLANCOS', 'NULOS', 'JUNTA_SEXO',]
+#df_filtrado_1=extract_unique_values_results("data_csv/seccionales/2019/resultados/resultados_2019_v_1.csv",columnas_duplicated)
 df_filtrado=extract_unique_values_results("data_csv/seccionales/2019/resultados/resultados_2019_v_1.csv",columnas_a_considerar)
 #print(df_filtrado_1)
 #print(df_filtrado)
@@ -595,11 +595,11 @@ df_con_id = assign_unique_identifier(columnas_a_considerar, df_filtrado)
 #conservar:
 #DIGNIDAD_CODIGO,PARROQUIA_CODIGO,CIRUSCRIPCION_CODIGO,JUNTA_SEXO,BLANCOS,NULOS,SUFRAGANTES
 
-conservar=['DIGNIDAD_CODIGO', 'CIRCUNSCRIPCION_CODIGO','CICUNSCRIPCION_NOMBRE', 'PARROQUIA_CODIGO','JUNTA_SEXO', 'BLANCOS', 'NULOS', 'SUFRAGANTES', 'ID']
+#conservar=['DIGNIDAD_CODIGO', 'CIRCUNSCRIPCION_CODIGO','CIRCUNSCRIPCION_NOMBRE', 'PARROQUIA_CODIGO','JUNTA_SEXO', 'BLANCOS', 'NULOS', 'SUFRAGANTES', 'ID']
 
 #drop other columns
-df_con_id = df_con_id[conservar]
-df_con_id.sort_values(by=["ID",'DIGNIDAD_CODIGO'], inplace=True)
+#df_con_id = df_con_id[conservar]
+#df_con_id.sort_values(by=["ID",'DIGNIDAD_CODIGO'], inplace=True)
 
 #print(df_con_id)
 
@@ -630,7 +630,7 @@ def find_row(df, column, value):
     return rows
 
 #Extract the the rows of the same DIGNIDAD_CODIGO
-df_1=find_row(df_con_id, 'JUNTA_SEXO', 'F')
+df_1=find_row(df_filtrado, 'JUNTA_SEXO', 'F')
 
 print(df_1)
 df2=find_row(df_1,'DIGNIDAD_CODIGO', 6.0 )
