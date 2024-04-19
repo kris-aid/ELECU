@@ -4,3 +4,4 @@ poetry.lock
 pyproject.toml
 /data_csv
 .venv
+/tests/test_results
