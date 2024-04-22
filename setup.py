@@ -27,7 +27,7 @@ setup(
         },
     license='GPL-3.0',
     keywords='Ecuador, elections, CNE',
-    long_description=read('README.md'),
+    #long_description=read('README.md'),
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Topic :: Utilities",
