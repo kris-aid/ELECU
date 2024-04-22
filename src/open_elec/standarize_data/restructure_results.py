@@ -108,7 +108,6 @@ class Standarized_Results:
                         # Leer el archivo en un DataFrame
                         df = pd.read_csv(file_path)
                         df.columns = [unidecode.unidecode(col) for col in df.columns]
-
                         año = re.findall(r'\d+', file)
                         df["ANIO"] = año[0]
                         df_registro = pd.concat([df_registro, df])
@@ -171,6 +170,27 @@ class Standarized_Results:
         
         return self.df_registro
     
+    def put_standar_geo_codes_registro(self,drop_old=False):
+        # cargar a las parroquias estandarizadas
+        std_parroquias = self.load_std_data("parroquias/std_parroquias.csv")
+        # hacer un merge con el DataFrame de resultados, en std parroquias la columna es PARROQUIA_CODIGO_OLD, en resultados es PARROQUIA_CODIGO
+        self.df_registro = pd.merge(self.df_registro, std_parroquias, left_on="PARROQUIA_CODIGO", right_on="PARROQUIA_CODIGO_OLD", how="left")
+        # rename the columns that have "_x" at the end with "_OLD" at the end
+        columns_to_rename_old={col:col[:-2]+"_OLD" for col in self.df_registro.columns if col.endswith("_x")}
+        self.df_registro.rename(columns=columns_to_rename_old, inplace=True)
+        
+        old_columns = [col for col in self.df_registro.columns if col.endswith("_OLD")]
+        if drop_old==True:
+            self.df_registro.drop(columns=old_columns, axis=1, inplace=True)
+        #rename columns with "_y" at the end
+        columns_to_rename={col:col[:-2] for col in self.df_registro.columns if col.endswith("_y")}
+        self.df_registro.rename(columns=columns_to_rename, inplace=True)
+        
+        columnas_ordenadas = ["PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO"]+[col for col in self.df_registro.columns if col.startswith("ELECTORES")]+["TOTAL ELECTORES"]
+        self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
+        
+        return self.df_registro 
+    
     def recuperar_resultados(self):
         '''
         Recupera los resultados de los archivos de resultados.
@@ -191,7 +211,8 @@ class Standarized_Results:
                         df = pd.read_csv(file_path)
                         df.columns = [unidecode.unidecode(col) for col in df.columns]
                         anio = file.split("resultados")[1].split(".")[0][1:]
-                        df["ANIO"] = anio
+                        vuelta = anio.split("_")[2]
+                        df["VUELTA"] = vuelta
                         df_resultados = pd.concat([df_resultados, df])
         return df_resultados
     
@@ -283,14 +304,7 @@ class Standarized_Results:
         map_dignidades =self.create_dict_mapping(df_dignidades_names)
         #print(map_dignidades)
         self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].map(map_dignidades)
-        # for _, row_eq in df_dignidades_names.iterrows():
-        #     row_eq=row_eq.values.tolist()
-            
-        #     for index, row in self.df_resultados.iterrows():
-        #         dignidad=row['DIGNIDAD_NOMBRE']
-        #         if dignidad in row_eq:
-        #             #print(sexo)
-        #             self.df_resultados.at[index,'DIGNIDAD_NOMBRE']=row_eq[0]
+       
 
         if "DIGNIDAD_CODIGO" not in self.df_resultados.columns:
             #create the column DIGNIDAD_CODIGO
@@ -302,8 +316,43 @@ class Standarized_Results:
         self.df_resultados = pd.merge(self.df_resultados, df_dignidades_codes, on="DIGNIDAD_NOMBRE", how="left")
         self.df_resultados.drop("DIGNIDAD_AMBITO", axis=1, inplace=True)
         self.df_resultados.drop("DIGNIDAD_CODIGO_x", axis=1, inplace=True)
-        self.df_resultados.rename(columns={'DIGNIDAD_CODIGO_y': 'DIGNIDAD_CODIGO'}, inplace=True)         
+        self.df_resultados.rename(columns={'DIGNIDAD_CODIGO_y': 'DIGNIDAD_CODIGO'}, inplace=True)       
+            
         return self.df_resultados
+    
+    def put_standar_geo_codes_results(self,drop_old=False):
+        # cargar a las parroquias estandarizadas
+        std_parroquias = self.load_std_data("parroquias/std_parroquias.csv")
+        # hacer un merge con el DataFrame de resultados, en std parroquias la columna es PARROQUIA_CODIGO_OLD, en resultados es PARROQUIA_CODIGO
+        self.df_resultados = pd.merge(self.df_resultados, std_parroquias, left_on="PARROQUIA_CODIGO", right_on="PARROQUIA_CODIGO_OLD", how="left")
+        # rename the columns that have "_x" at the end with "_OLD" at the end
+        
+        columns_to_rename_old={col:col[:-2]+"_OLD" for col in self.df_resultados.columns if col.endswith("_x")}
+        self.df_resultados.rename(columns=columns_to_rename_old, inplace=True)
+        
+        old_columns = [col for col in self.df_resultados.columns if col.endswith("_OLD")]
+        if drop_old==True:
+           self.df_resultados.drop(columns=old_columns, axis=1, inplace=True)
+        #rename columns with "_y" at the end
+        columns_to_rename={col:col[:-2] for col in self.df_resultados.columns if col.endswith("_y")}
+        self.df_resultados.rename(columns=columns_to_rename, inplace=True)
+        
+        columnas_ordenadas = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO"]+[col for col in self.df_resultados if col.startswith("CIRCUNSCRIPCION")]+[col for col in self.df_resultados.columns if col.startswith("CANDIDATO_")]+[col for col in self.df_resultados.columns if col.startswith("OP_")]+["SEXO", 'BLANCOS', 'NULOS',"VOTOS",'VUELTA']
+        if drop_old==False:
+            columnas_ordenadas = columnas_ordenadas + old_columns
+        # ordenar las columnas
+        self.df_resultados = self.df_resultados[columnas_ordenadas]
+        #encode the columns to int
+        #if the dignidad_codigo column has NaN values, replace them with 0
+        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna(0)
+        
+        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
+        self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
+        self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
+        self.df_resultados["NULOS"] = self.df_resultados["NULOS"].astype(int)
+        return self.df_resultados
+        
+    
     def divide_resultados(self):
         '''
         Divide los resultados en dos DataFrames: uno con los resultados de la votación y otro con la elección de candidatos.
@@ -317,8 +366,8 @@ class Standarized_Results:
         
         '''
         # se va a utilizar las columnas de la tabla de resultados para dividir en dos DataFrames 
-        columnas_de_votacion = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", 'BLANCOS', 'NULOS','ANIO']
-        columnas_de_eleccion = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VOTOS", 'ANIO']
+        columnas_de_votacion = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", 'BLANCOS', 'NULOS','VUELTA']
+        columnas_de_eleccion = ["DIGNIDAD_CODIGO","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VOTOS", 'VUELTA']
         # preserve the columns if they are present
         if 'SUFRAGANTES' in self.df_resultados.columns:
             columnas_de_votacion.append('SUFRAGANTES')
@@ -365,13 +414,14 @@ if __name__ == "__main__":
     os.chdir(current_directory)
     print(current_directory)
     #D:\Open-ELEC\data_csv\seccionales\2014\diccionarios
-    input_folder = "../../../data_csv/generales/2006"
+    input_folder = "../../../data_csv/generales/2023"
     standarized_folder = "../data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
     print(standarized_results.df_resultados)
-    test=standarized_results.change_resultados()
-    test.to_csv("../../../tests/test_results/test_2006.csv", index=False)
-    test_2021_votacion, test_2021_eleccion = standarized_results.divide_resultados()
-    test_2021_votacion.to_csv("../../../tests/test_results/test_2006_votacion.csv", index=False)
-    test_2021_eleccion.to_csv("../../../tests/test_results/test_2006_eleccion.csv", index=False)
+    standarized_results.change_resultados()
+    test = standarized_results.put_standar_geo_codes_results(drop_old=True)
+    test.to_csv("../../../tests/test_results/test_2023.csv", index=False)
+    test_2023_votacion, test_2023_eleccion = standarized_results.divide_resultados()
+    test_2023_votacion.to_csv("../../../tests/test_results/test_2023_votacion.csv", index=False)
+    test_2023_eleccion.to_csv("../../../tests/test_results/test_2023_eleccion.csv", index=False)
     
