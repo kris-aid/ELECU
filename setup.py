@@ -23,7 +23,7 @@ setup(
     election outcomes from the CNE (Consejo Nacional Electoral) website.""",
     url='https://github.com/kris-aid/Open-ELEC',
     project_urls={
-        'Documentation': 'https://kris-aid.github.io/Open-ELEC/'
+        'Documentation': 'https://kris-aid.github.io/ELECU/'
         },
     license='GPL-3.0',
     keywords='Ecuador, elections, CNE',
