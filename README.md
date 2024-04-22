@@ -23,7 +23,7 @@ Python 3.7 o superior, compatible con Pandas, Numpy, Geopandas, Matplotlib, Seab
 
 # Instalación
 ```bash
-pip install open-elec
+pip install elecu
 ```
 
 # Uso
