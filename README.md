@@ -55,7 +55,7 @@ Para citar este proyecto, por favor use la siguiente referencia:
 ```
 @misc{ELECU,
   author = {Kristian Mendoza},
-    title = {Open-ELEC},
+    title = {ELECU},
     year = {2023},
     publisher = {GitHub},
     journal = {GitHub repository},    

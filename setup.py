@@ -4,7 +4,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 setup(
     name='elecu',
-    version='0.0.1',
+    version='0.0.2',
     packages=find_packages(),
     package_data={'': ['data/*']},
     install_requires=[
@@ -21,7 +21,7 @@ setup(
     the accessibility and analysis of official electoral results in Ecuador. 
     This project provides a Python library for efficiently retrieving and analyzing 
     election outcomes from the CNE (Consejo Nacional Electoral) website.""",
-    url='https://github.com/kris-aid/Open-ELEC',
+    url='https://github.com/kris-aid/ELECU',
     project_urls={
         'Documentation': 'https://kris-aid.github.io/ELECU/'
         },
@@ -38,6 +38,3 @@ setup(
     ],
     
     )
-
-if __name__ == '__main__':
-    print(read('README.md'))
