@@ -2,8 +2,11 @@ import pandas as pd
 import numpy as np
 import os
 import matplotlib.pyplot as plt
-import extract_values as ev
 import seaborn as sns
+#get the current directory
+current_directory = os.path.dirname(os.path.abspath(__file__))
+# establishes it as the current directory
+os.chdir(current_directory)
 def visualize_results(df_resultados, bar_plot=False, pie_plot=False):
     """
     Visualiza los resultados de la elección
@@ -65,14 +68,3 @@ def visualize_results(df_resultados, bar_plot=False, pie_plot=False):
         
     return None
 
-if __name__ == "__main__":
-     #get the current directory
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    # establishes it as the current directory
-    os.chdir(current_directory)
-    df_resultados = pd.read_csv("../../tests/test_results/test_2023_eleccion.csv")
-    df_resultados = ev.extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo="P01",agrupar_por_territorio="PROVINCIA", sexo="AMBOS", vuelta=1)
-    #df_resultados.to_csv("../../../tests/test_results/test_2023_eleccion_filtered.csv", index=False)
-    visualize_results(df_resultados, bar_plot=True, pie_plot=True)
-    print("Visualización completada")
-    

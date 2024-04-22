@@ -1,7 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-
+    #get the current directory
+current_directory = os.path.dirname(os.path.abspath(__file__))
+# establishes it as the current directory
+os.chdir(current_directory)
 def extract_eleccion(df_resultados,dignidad_codigo=None,territorio_codigo=None,agrupar_por_territorio=None,sexo=None,vuelta=None):
     """
     Extrae los valores de la elección de acuerdo a los parámetros de entrada
@@ -85,15 +88,3 @@ def extract_eleccion(df_resultados,dignidad_codigo=None,territorio_codigo=None,a
     else:
         pass
     return df_resultados
-if __name__ == "__main__":
-     #get the current directory
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    # establishes it as the current directory
-    os.chdir(current_directory)
-    # test with the 2023 results that are in the test folder
-    df_resultados = pd.read_csv("../../tests/test_results/test_2023_eleccion.csv")
-
-    # Test 1: extract values for a specific dignidad
-    df_resultados_filtered = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo="P01",agrupar_por_territorio="PROVINCIA", sexo="AMBOS", vuelta=None)
-    print(df_resultados_filtered)
-    print(df_resultados_filtered.columns)

@@ -1,6 +1,6 @@
 # Este script es para generar los diccionarios estandarizados de las dignidades, parroquias, cantones, provincias
 
-# Path: source/standarize_the_data/create_std_dicts.py
+# Path: create_std_dicts.py
 
 import os
 import pandas as pd
@@ -8,6 +8,11 @@ import numpy as np
 import re
 import sys
 import unidecode
+
+#get the current directory
+current_directory = os.path.dirname(os.path.abspath(__file__))
+# establishes it as the current directory
+os.chdir(current_directory)
 class Standard_Dictionaries:
     '''
     Clase para estandarizar los diccionarios de las elecciones
@@ -31,7 +36,7 @@ class Standard_Dictionaries:
                 path al directorio donde se encuentran los diccionarios estandarizados como csv
         '''
         if standarized_folder is None:
-            self.standarized_folder = "../data/Codigos_estandar/"
+            self.standarized_folder = "data/Codigos_estandar/"
         else:
             self.standarized_folder = standarized_folder
         
@@ -373,7 +378,6 @@ class Standard_Dictionaries:
         else:
             df=self.load_std_data("cantones/std_cantones_2009_2013.csv")
         # Vamos a hacer un left join con el DataFrame de los cantones estandarizados
-        
         self.df_cantones = self.df_cantones.merge(df, left_on="CANTON_CODIGO",right_on="CANTON_CODIGO_OLD", how="left")
         #quitar las columnas que no necesitamos
         for col in self.df_cantones.columns:
@@ -469,23 +473,3 @@ class Standard_Dictionaries:
         # ordenar las columnas
         self.df_parroquias = self.df_parroquias[["PROVINCIA_CODIGO","PROVINCIA_NOMBRE","CANTON_CODIGO","CANTON_NOMBRE","PARROQUIA_CODIGO","PARROQUIA_CODIGO_OLD","PARROQUIA_NOMBRE","PARROQUIA_ESTADO"]]
         return self.df_parroquias
-        
-import os
-if __name__ == "__main__":
-    #get the current directory
-    current_directory = os.path.dirname(os.path.abspath(__file__))
-    # establishes it as the current directory
-    os.chdir(current_directory)
-    print(current_directory)
-    #D:\Open-ELEC\data_csv\seccionales\2014\diccionarios
-    input_folder = "../../data_csv/seccionales/2009"
-    std_dicts = Standard_Dictionaries(input_folder)
-    print(std_dicts.df_provincias)
-    std_dicts.change_to_std_provincias()
-    print(std_dicts.df_provincias)
-    print(std_dicts.df_cantones)
-    std_dicts.change_to_std_cantones()
-    print(std_dicts.df_cantones)
-    print(std_dicts.df_parroquias)
-    std_dicts.change_to_std_parroquias()
-    print(std_dicts.df_parroquias)
