@@ -27,7 +27,8 @@ setup(
         },
     license='GPL-3.0',
     keywords='Ecuador, elections, CNE',
-    #long_description=read('README.md'),
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",
         "Topic :: Utilities",
@@ -35,3 +36,6 @@ setup(
     ],
     
     )
+
+if __name__ == '__main__':
+    print(read('README.md'))
