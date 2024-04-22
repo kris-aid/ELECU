@@ -1,4 +1,5 @@
 import pandas as pd
+import elecu
 from elecu.transform_to_csv import convert_sav_to_csv
 
 def test_convert_sav_to_csv():
