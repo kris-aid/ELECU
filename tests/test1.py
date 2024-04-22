@@ -45,12 +45,12 @@ def test_extract_eleccion():
     print(df_resultados_filtered)
     print(df_resultados_filtered.columns)
 
-from open_elec.visualize_results import visualize_results
+from open_elec.visualize_results import visualize_results_presidentes
 def test_visualize_results():
     df_resultados = pd.read_csv("../../tests/test_results/test_2023_eleccion.csv")
     df_resultados = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo="P01",agrupar_por_territorio="PROVINCIA", sexo="AMBOS", vuelta=1)
     #df_resultados.to_csv("../../../tests/test_results/test_2023_eleccion_filtered.csv", index=False)
-    visualize_results(df_resultados, bar_plot=True, pie_plot=True)
+    visualize_results_presidentes(df_resultados, bar_plot=True, pie_plot=True)
     print("Visualización completada")
 
 if __name__ == "__main__":

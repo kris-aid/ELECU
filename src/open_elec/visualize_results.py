@@ -7,7 +7,8 @@ import seaborn as sns
 current_directory = os.path.dirname(os.path.abspath(__file__))
 # establishes it as the current directory
 os.chdir(current_directory)
-def visualize_results(df_resultados, bar_plot=False, pie_plot=False):
+
+def visualize_results_presidentes(df_resultados, bar_plot=False, pie_plot=False):
     """
     Visualiza los resultados de la elección
     
