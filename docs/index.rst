@@ -1,9 +1,9 @@
-.. Open-ELEC documentation master file, created by
+.. ELECU documentation master file, created by
    sphinx-quickstart on Mon Apr  1 20:14:14 2024.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Open-ELEC's documentation!
+Welcome to ELECU's documentation!
 =====================================
 
 .. toctree::

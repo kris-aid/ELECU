@@ -1,12 +1,12 @@
 import pandas as pd
-from open_elec.transform_to_csv import convert_sav_to_csv
+from elecu.transform_to_csv import convert_sav_to_csv
 
 def test_convert_sav_to_csv():
     input_folder = "data"
     output_folder = "data_csv"
     convert_sav_to_csv(input_folder, output_folder)
     
-from open_elec.create_std_dicts import Standard_Dictionaries
+from elecu.create_std_dicts import Standard_Dictionaries
 
 def test_create_std_dicts():
     input_folder = "data_csv/seccionales/2009"
@@ -21,7 +21,7 @@ def test_create_std_dicts():
     std_dicts.change_to_std_parroquias()
     print(std_dicts.df_parroquias)
     
-from open_elec.restructure_results import Standarized_Results    
+from elecu.restructure_results import Standarized_Results    
 def test_standarized_results():
     input_folder = "data_csv/generales/2023"
     standarized_folder = "data/Codigos_estandar/"
@@ -34,7 +34,7 @@ def test_standarized_results():
     test_2023_votacion.to_csv("tests/test_results/test_2023_votacion.csv", index=False)
     test_2023_eleccion.to_csv("tests/test_results/test_2023_eleccion.csv", index=False)
     
-from open_elec.extract_values import extract_eleccion
+from elecu.extract_values import extract_eleccion
 
 def test_extract_eleccion():
 
@@ -45,7 +45,7 @@ def test_extract_eleccion():
     print(df_resultados_filtered)
     print(df_resultados_filtered.columns)
 
-from open_elec.visualize_results import visualize_results_presidentes
+from elecu.visualize_results import visualize_results_presidentes
 def test_visualize_results():
     df_resultados = pd.read_csv("../../tests/test_results/test_2023_eleccion.csv")
     df_resultados = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo="P01",agrupar_por_territorio="PROVINCIA", sexo="AMBOS", vuelta=1)

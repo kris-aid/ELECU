@@ -3,7 +3,7 @@ import os
 def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 setup(
-    name='open_elec',
+    name='elecu',
     version='0.0.1',
     packages=find_packages(),
     package_data={'': ['data/*']},
@@ -17,7 +17,7 @@ setup(
     #
     author='Kristian Mendoza',
     description="""\
-    Open Elec Open-ELEC is a Python-based open-source project designed to enhance 
+    ELE is a Python-based open-source project designed to enhance 
     the accessibility and analysis of official electoral results in Ecuador. 
     This project provides a Python library for efficiently retrieving and analyzing 
     election outcomes from the CNE (Consejo Nacional Electoral) website.""",
