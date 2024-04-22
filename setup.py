@@ -1,18 +1,37 @@
-from setuptools import setup, find_namespace_packages
-
+from setuptools import setup, find_packages
+import os
+def read(fname):
+    return open(os.path.join(os.path.dirname(__file__), fname)).read()
 setup(
-    name='open-elec',
+    name='open_elec',
     version='0.0.1',
-    packages=find_namespace_packages(where="src"),
-    package_dir={"": "src"},
-    package_data={
-        'open-elec': ['data/*/*.csv'],
-        'open-elec.data': ['*/*.csv'],
-        
-    },
+    packages=find_packages(),
+    package_data={'': ['data/*']},
     install_requires=[
-        # add your dependencies here
+        'pandas',
+        'numpy',
+        'matplotlib',
+        'seaborn',
+        'unidecode'
     ],
-    include_package_data=True,
+    #
+    author='Kristian Mendoza',
+    description="""\
+    Open Elec Open-ELEC is a Python-based open-source project designed to enhance 
+    the accessibility and analysis of official electoral results in Ecuador. 
+    This project provides a Python library for efficiently retrieving and analyzing 
+    election outcomes from the CNE (Consejo Nacional Electoral) website.""",
+    url='https://github.com/kris-aid/Open-ELEC',
+    project_urls={
+        'Documentation': 'https://kris-aid.github.io/Open-ELEC/'
+        },
+    license='GPL-3.0',
+    keywords='Ecuador, elections, CNE',
+    long_description=read('README.md'),
+    classifiers=[
+        "Development Status :: 2 - Pre-Alpha",
+        "Topic :: Utilities",
+        "License :: GNU General Public License v3 (GPLv3)"
+    ],
     
-)
+    )
