@@ -4,7 +4,7 @@ def read(fname):
     return open(os.path.join(os.path.dirname(__file__), fname)).read()
 setup(
     name='elecu',
-    version='0.0.1',
+    version='0.0.2',
     packages=find_packages(),
     package_data={'': ['data/*']},
     install_requires=[
