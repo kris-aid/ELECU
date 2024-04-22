@@ -522,11 +522,11 @@ def crear_df_info(df_info, column_to_study, column_to_use):
 # df_candidatos_std=crear_df_info(df_candidatos, "CANDIDATO_NOMBRE", "CANDIDATO_CODIGO")
 # df_candidatos_std.to_csv("data_csv/Codigos_estandar/candidatos/candidatos_matrix.csv")
 
-# df_organizaciones=recuperar_info(input_folder,"organizaciones_politicas", ["OP_NOMBRE","OP_AMBITO","OP_SIGLAS"],"OP_SIGLA")
+# df_organizaciones=recuperar_info(input_folder,"organizaciones_politicas", ["OP_NOMBRE","OP_AMBITO","OP_SIGLAS","OP_CODIGO"],"OP_SIGLA")
 # print(df_organizaciones)
 # df_organizaciones.to_csv("data_csv/Codigos_estandar/organizaciones/2_organizaciones.csv", index=True, header=True)
-# df_organizaciones_std=crear_df_info(df_organizaciones, "OP_SIGLAS", "OP_NOMBRE")
-# df_organizaciones_std.to_csv("data_csv/Codigos_estandar/organizaciones/2_organizaciones_matrix.csv")
+#df_organizaciones_std=crear_df_info(df_organizaciones, "OP_SIGLAS", "OP_NOMBRE")
+#df_organizaciones_std.to_csv("data_csv/Codigos_estandar/organizaciones/2_organizaciones_matrix.csv")
 
 
 def extract_unique_values_results(input_file,columnas_a_considerar):
