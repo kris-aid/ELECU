@@ -91,7 +91,7 @@ if __name__ == "__main__":
     # establishes it as the current directory
     os.chdir(current_directory)
     # test with the 2023 results that are in the test folder
-    df_resultados = pd.read_csv("../../../tests/test_results/test_2023_eleccion.csv")
+    df_resultados = pd.read_csv("../../tests/test_results/test_2023_eleccion.csv")
 
     # Test 1: extract values for a specific dignidad
     df_resultados_filtered = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo="P01",agrupar_por_territorio="PROVINCIA", sexo="AMBOS", vuelta=None)

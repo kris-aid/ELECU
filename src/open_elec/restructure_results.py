@@ -414,14 +414,14 @@ if __name__ == "__main__":
     os.chdir(current_directory)
     print(current_directory)
     #D:\Open-ELEC\data_csv\seccionales\2014\diccionarios
-    input_folder = "../../../data_csv/generales/2023"
-    standarized_folder = "../data/Codigos_estandar/"
+    input_folder = "../../data_csv/generales/2023"
+    standarized_folder = "data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
     print(standarized_results.df_resultados)
     standarized_results.change_resultados()
     test = standarized_results.put_standar_geo_codes_results(drop_old=True)
-    test.to_csv("../../../tests/test_results/test_2023.csv", index=False)
+    test.to_csv("../../tests/test_results/test_2023.csv", index=False)
     test_2023_votacion, test_2023_eleccion = standarized_results.divide_resultados()
-    test_2023_votacion.to_csv("../../../tests/test_results/test_2023_votacion.csv", index=False)
-    test_2023_eleccion.to_csv("../../../tests/test_results/test_2023_eleccion.csv", index=False)
+    test_2023_votacion.to_csv("../../tests/test_results/test_2023_votacion.csv", index=False)
+    test_2023_eleccion.to_csv("../../tests/test_results/test_2023_eleccion.csv", index=False)
     

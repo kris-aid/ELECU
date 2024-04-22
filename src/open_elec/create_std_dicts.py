@@ -478,7 +478,7 @@ if __name__ == "__main__":
     os.chdir(current_directory)
     print(current_directory)
     #D:\Open-ELEC\data_csv\seccionales\2014\diccionarios
-    input_folder = "../../../data_csv/seccionales/2009"
+    input_folder = "../../data_csv/seccionales/2009"
     std_dicts = Standard_Dictionaries(input_folder)
     print(std_dicts.df_provincias)
     std_dicts.change_to_std_provincias()

@@ -1,4 +1,4 @@
-from src.open_elec.standarize_data.create_std_dicts import Standard_Dictionaries
+from open_elec.create_std_dicts import Standard_Dictionaries
 
 def test_create_std_dicts():
     input_folder = "data_csv/seccionales/2023/diccionarios"
