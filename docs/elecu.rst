@@ -1,45 +1,45 @@
-open\_elec package
+elecu package
 ==================
 
 Submodules
 ----------
 
-open\_elec.create\_std\_dicts module
+elecu.create\_std\_dicts module
 ------------------------------------
 
-.. automodule:: open_elec.create_std_dicts
+.. automodule:: elecu.create_std_dicts
    :members:
    :undoc-members:
    :show-inheritance:
 
-open\_elec.extract\_values module
+elecu.extract\_values module
 ---------------------------------
 
-.. automodule:: open_elec.extract_values
+.. automodule:: elecu.extract_values
    :members:
    :undoc-members:
    :show-inheritance:
 
-open\_elec.restructure\_results module
+elecu.restructure\_results module
 --------------------------------------
 
-.. automodule:: open_elec.restructure_results
+.. automodule:: elecu.restructure_results
    :members:
    :undoc-members:
    :show-inheritance:
 
-open\_elec.transform\_to\_csv module
+elecu.transform\_to\_csv module
 ------------------------------------
 
-.. automodule:: open_elec.transform_to_csv
+.. automodule:: elecu.transform_to_csv
    :members:
    :undoc-members:
    :show-inheritance:
 
-open\_elec.visualize\_results module
+elecu.visualize\_results module
 ------------------------------------
 
-.. automodule:: open_elec.visualize_results
+.. automodule:: elecu.visualize_results
    :members:
    :undoc-members:
    :show-inheritance:
@@ -47,7 +47,7 @@ open\_elec.visualize\_results module
 Module contents
 ---------------
 
-.. automodule:: open_elec
+.. automodule:: elecu
    :members:
    :undoc-members:
    :show-inheritance:

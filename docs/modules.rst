@@ -1,7 +1,7 @@
-open_elec
+elecu
 =========
 
 .. toctree::
    :maxdepth: 4
 
-   open_elec
+   elecu
