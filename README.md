@@ -1,5 +1,5 @@
-# Open-ELEC
-Open-ELEC es un proyecto de código abierto basado en Python diseñado para mejorar la accesibilidad y el análisis de los resultados electorales oficiales en Ecuador. Este proyecto proporciona una biblioteca de Python para recuperar y analizar eficientemente los resultados de las elecciones de Ecuador. La información oficial es proporcionada por el Consejo Nacional Electoral del Ecuador.
+# ELECU
+Elections-Ecuador (ELECU) es un proyecto de código abierto basado en Python diseñado para mejorar la accesibilidad y el análisis de los resultados electorales oficiales en Ecuador. Este proyecto proporciona una biblioteca de Python para recuperar y analizar eficientemente los resultados de las elecciones de Ecuador. La información oficial es proporcionada por el Consejo Nacional Electoral del Ecuador.
 # Descripción
 
 
@@ -23,13 +23,13 @@ Python 3.7 o superior, compatible con Pandas, Numpy, Geopandas, Matplotlib, Seab
 
 # Instalación
 ```bash
-pip install open-elec
+pip install elecu
 ```
 
 # Uso
 
 ```python
-import open_elec as oe
+import elecu
 ```
 
 
@@ -53,7 +53,7 @@ Para contribuir o reportar errores, por favor abrir un issue en el repositorio d
 # Citación
 Para citar este proyecto, por favor use la siguiente referencia:
 ```
-@misc{Open-ELEC,
+@misc{ELECU,
   author = {Kristian Mendoza},
     title = {Open-ELEC},
     year = {2023},
