@@ -21,7 +21,7 @@ setup(
     the accessibility and analysis of official electoral results in Ecuador. 
     This project provides a Python library for efficiently retrieving and analyzing 
     election outcomes from the CNE (Consejo Nacional Electoral) website.""",
-    url='https://github.com/kris-aid/Open-ELEC',
+    url='https://github.com/kris-aid/ELECU',
     project_urls={
         'Documentation': 'https://kris-aid.github.io/ELECU/'
         },
