@@ -137,7 +137,7 @@ class Standarized_Results:
             self.df_registro.rename(columns={'GRANDES_GRUPOS_DE_EDAD_1V': 'G_EDAD'}, inplace=True)
         elif 'G_EDAD' in self.df_registro.columns:
             pass
-       
+        #print(self.df_registro)
         self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].astype(str)
         
         if 'SEXO' in self.df_registro.columns:
@@ -150,13 +150,13 @@ class Standarized_Results:
         sexo_mapping=self.create_dict_mapping(df_sexo_names)
         self.df_registro['SEXO'] = self.df_registro['SEXO'].map(sexo_mapping)
         
-        
+        #print(self.df_registro) 
         df_electores_names = self.load_std_data("registro_electoral/electores_names_std.csv")
         electores_mapping=self.create_dict_mapping(df_electores_names)
-        self.df_registro['ELECTORES'] = self.df_registro['ELECTORES'].map(electores_mapping)
+        self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].map(electores_mapping)
         #drop columns if they are present
         self.df_registro.drop("ANIO", axis=1, inplace=True)
-        
+        #print(self.df_registro)
         #Now we want to pivot the table. All the columns will be the same except G_EDAD y ELECTORES
         #We will have new columns for each value of G_EDAD and ELECTORES
         self.df_registro = self.df_registro.pivot_table(index=self.df_registro.columns.difference(['G_EDAD','ELECTORES']).tolist(), columns='G_EDAD', values='ELECTORES', aggfunc='first').reset_index()
@@ -190,6 +190,7 @@ class Standarized_Results:
         self.df_registro.rename(columns=columns_to_rename, inplace=True)
         
         columnas_ordenadas = ["PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO"]+[col for col in self.df_registro.columns if col.startswith("ELECTORES")]+["TOTAL ELECTORES"]
+        self.df_registro = self.df_registro[columnas_ordenadas]
         self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
         
         return self.df_registro 
@@ -410,5 +411,3 @@ class Standarized_Results:
         return df_votacion, df_eleccion
         
         
-
-    
