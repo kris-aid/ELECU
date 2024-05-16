@@ -24,16 +24,22 @@ def test_create_std_dicts():
     
 from elecu.restructure_results import Standarized_Results    
 def test_standarized_results():
-    input_folder = "data_csv/generales/2023"
+    input_folder = "../../data_csv/generales/2023"
     standarized_folder = "data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
-    print(standarized_results.df_resultados)
-    standarized_results.change_resultados()
-    test = standarized_results.put_standar_geo_codes_results(drop_old=True)
-    test.to_csv("tests/test_results/test_2023.csv", index=False)
-    test_2023_votacion, test_2023_eleccion = standarized_results.divide_resultados()
-    test_2023_votacion.to_csv("tests/test_results/test_2023_votacion.csv", index=False)
-    test_2023_eleccion.to_csv("tests/test_results/test_2023_eleccion.csv", index=False)
+    #print(standarized_results.df_resultados)
+    print(standarized_results.df_registro)
+    #standarized_results.change_resultados()
+    standarized_results.change_registro()
+    print(standarized_results.df_registro)
+    test_registro = standarized_results.put_standar_geo_codes_registro(drop_old=True)
+    #test = standarized_results.put_standar_geo_codes_results(drop_old=True)
+    
+    # test.to_csv("../../tests/test_results/test_2023.csv", index=False)
+    test_registro.to_csv("../../tests/test_results/test_registro_2023.csv", index=False)
+    # test_2023_votacion, test_2023_eleccion = standarized_results.divide_resultados()
+    # test_2023_votacion.to_csv("../../tests/test_results/test_2023_votacion.csv", index=False)
+    # test_2023_eleccion.to_csv("../../tests/test_results/test_2023_eleccion.csv", index=False)
     
 from elecu.extract_values import extract_eleccion
 
@@ -56,4 +62,4 @@ def test_visualize_results():
 
 if __name__ == "__main__":
 
-    test_standarized_results()
+   test_visualize_results()

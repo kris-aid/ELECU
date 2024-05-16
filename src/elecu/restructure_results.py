@@ -58,7 +58,6 @@ class Standarized_Results:
         # Construir el path del archivo
         file_path = os.path.join(self.standarized_folder, file)
         # Leer el archivo en un DataFrame
-        print(file_path)
         df = pd.read_csv(file_path)
         return df
     
@@ -129,66 +128,92 @@ class Standarized_Results:
             - df_registro: pd.DataFrame
                 DataFrame con el registro de los archivos de resultados.
         '''
+        
         # Cambiar el nombre de las columnas
         self.df_registro.columns = [unidecode.unidecode(col) for col in self.df_registro.columns]
+        
         if 'GRANDES_GRUPOS_DE_EDAD' in self.df_registro.columns:
             self.df_registro.rename(columns={'GRANDES_GRUPOS_DE_EDAD': 'G_EDAD'}, inplace=True)
         elif 'GRANDES_GRUPOS_DE_EDAD_1V' in self.df_registro.columns:
             self.df_registro.rename(columns={'GRANDES_GRUPOS_DE_EDAD_1V': 'G_EDAD'}, inplace=True)
         elif 'G_EDAD' in self.df_registro.columns:
             pass
-        #print(self.df_registro)
-        self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].astype(str)
         
+        #convert the column G_EDAD to string
+        self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].astype(str)
+    
+        # Colocar el nombre correcto de la columna SEXO
         if 'SEXO' in self.df_registro.columns:
             pass
         elif 'JUNTA_SEXO' in self.df_registro.columns:
             self.df_registro.rename(columns={'JUNTA_SEXO': 'SEXO'}, inplace=True)
-        
-        # Now for the SEXO column we want to change the values based on the sexo_names_std in the standarized folder
+            
+        #ahora se colocan los nombres correctos de las columnas de sexo
         df_sexo_names = self.load_std_data("registro_electoral/sexo_names_std.csv")
         sexo_mapping=self.create_dict_mapping(df_sexo_names)
         self.df_registro['SEXO'] = self.df_registro['SEXO'].map(sexo_mapping)
         
-        #print(self.df_registro) 
+        # Colocar el nombre correcto de las columnas de electores
         df_electores_names = self.load_std_data("registro_electoral/electores_names_std.csv")
         electores_mapping=self.create_dict_mapping(df_electores_names)
         self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].map(electores_mapping)
-        #drop columns if they are present
+        
+        #drop la columna ANIO
         self.df_registro.drop("ANIO", axis=1, inplace=True)
-        #print(self.df_registro)
-        #Now we want to pivot the table. All the columns will be the same except G_EDAD y ELECTORES
-        #We will have new columns for each value of G_EDAD and ELECTORES
+       
+        # Se va a pivotear el DataFrame para que las columnas sean los grupos de edad
         self.df_registro = self.df_registro.pivot_table(index=self.df_registro.columns.difference(['G_EDAD','ELECTORES']).tolist(), columns='G_EDAD', values='ELECTORES', aggfunc='first').reset_index()
         
         # Ahora se suma el valor de los electores por cada fila para obtener el total
         # se suman las columnas que empiezan con ELECTORES
         self.df_registro['TOTAL ELECTORES'] = self.df_registro[[col for col in self.df_registro.columns if 'ELECTORES' in col]].sum(axis=1)
-        # the NaN values are replaced by 0
+        
+        # si hay valores nulos, se reemplazan por 0
         self.df_registro.fillna(0, inplace=True)
         
         self.df_registro = self.df_registro[["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"]+[col for col in self.df_registro.columns if col.startswith("ELECTORES")]+["TOTAL ELECTORES"]]
-        #sort by PROVINCIA_CODIGO, CANTON_CODIGO, PARROQUIA_CODIGO, SEXO
+        
+        #ordenar by PROVINCIA_CODIGO, CANTON_CODIGO, PARROQUIA_CODIGO, SEXO
         self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
         
         return self.df_registro
     
     def put_standar_geo_codes_registro(self,drop_old=False):
+        """ 
+        Pone los códigos geográficos estandarizados en el DataFrame de registro
+        Parameters
+        ----------
+        drop_old: bool
+            Si es True, se eliminan las columnas que terminan con "_OLD"
+        Returns
+        -------
+        - df_registro: pd.DataFrame
+            DataFrame con los códigos geográficos estandarizados
+            
+        """
+        
         # cargar a las parroquias estandarizadas
         std_parroquias = self.load_std_data("parroquias/std_parroquias.csv")
+        
         # hacer un merge con el DataFrame de resultados, en std parroquias la columna es PARROQUIA_CODIGO_OLD, en resultados es PARROQUIA_CODIGO
         self.df_registro = pd.merge(self.df_registro, std_parroquias, left_on="PARROQUIA_CODIGO", right_on="PARROQUIA_CODIGO_OLD", how="left")
-        # rename the columns that have "_x" at the end with "_OLD" at the end
+        
+        # Renombrar las columnas que tienen "_x" al final con "_OLD" al final
         columns_to_rename_old={col:col[:-2]+"_OLD" for col in self.df_registro.columns if col.endswith("_x")}
         self.df_registro.rename(columns=columns_to_rename_old, inplace=True)
         
         old_columns = [col for col in self.df_registro.columns if col.endswith("_OLD")]
+        
+        #Si drop_old es True, se eliminan las columnas que terminan con "_OLD"
         if drop_old==True:
             self.df_registro.drop(columns=old_columns, axis=1, inplace=True)
-        #rename columns with "_y" at the end
+            
+            
+        # Renombrar las columnas que tienen "_y" al final con "" al final
         columns_to_rename={col:col[:-2] for col in self.df_registro.columns if col.endswith("_y")}
         self.df_registro.rename(columns=columns_to_rename, inplace=True)
         
+        # Ordenar las columnas
         columnas_ordenadas = ["PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO"]+[col for col in self.df_registro.columns if col.startswith("ELECTORES")]+["TOTAL ELECTORES"]
         self.df_registro = self.df_registro[columnas_ordenadas]
         self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
@@ -275,45 +300,43 @@ class Standarized_Results:
             self.df_resultados.drop("NUMERO_DE_JUNTAS", axis=1, inplace=True)
         if 'CANDIDATO_ESTADO' in self.df_resultados.columns:
             self.df_resultados.drop("CANDIDATO_ESTADO", axis=1, inplace=True)
-        
+            
+            
+        #Colocar los nombres correctos de la columna sexo
         df_sexo_names = self.load_std_data("resultados/sexo_names_std.csv")
-        
         sex_mapping = self.create_dict_mapping(df_sexo_names)
-        
         self.df_resultados['SEXO'] = self.df_resultados['SEXO'].map(sex_mapping) 
 
         
-        
+        # Si el anio es menor a 2007, se carga el diccionario de dignidades pre 2007
         if int(anio) < 2007:
             df_dignidades_codes = self.load_std_data("dignidades/std_dignidades_pre_2007.csv")
+            
+        # Si el anio es mayor o igual a 2007, se carga el diccionario de dignidades post 2007
         else:
             df_dignidades_codes = self.load_std_data("dignidades/std_dignidades_post_2007.csv")
         
         if "DIGNIDAD_NOMBRE" not in self.df_resultados.columns:
-            #the anio is the last 4 characters of the input_folder
+            #El anio son los ultimos 4 caracteres de la carpeta de entrada
             anio = self.input_folder[-4:]
             path_diccionario_dignidades = self.input_folder + "/diccionarios/dignidades_"+anio+".csv"
             df_diccionario_dignidades = pd.read_csv(path_diccionario_dignidades)
+            
             #Colocar el nombre de la dignidad
             self.df_resultados = pd.merge(self.df_resultados, df_diccionario_dignidades, on="DIGNIDAD_CODIGO", how="left")
             self.df_resultados.drop("DIGNIDAD_AMBITO", axis=1, inplace=True)
             
-        #unidecode the dignidad_nombre column
-        
+        #Unidecode la columna DIGNIDAD_NOMBRE
         self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].apply(unidecode.unidecode)  
         df_dignidades_names = self.load_std_data("dignidades/equivalencias_dignidades.csv")
-        # retrieve the values of each row in the df_sexo_names as a list
-        
-        
         map_dignidades =self.create_dict_mapping(df_dignidades_names)
-        #print(map_dignidades)
         self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].map(map_dignidades)
        
-
+        # Si no existe la columna DIGNIDAD_CODIGO, se crea una columna DIGNIDAD_CODIGO con valores NaN
         if "DIGNIDAD_CODIGO" not in self.df_resultados.columns:
-            #create the column DIGNIDAD_CODIGO
+            #crear una columna DIGNIDAD_CODIGO con valores NaN
             self.df_resultados["DIGNIDAD_CODIGO"] = np.nan
-            # put it on the beginning of the columns
+            # poner la columna DIGNIDAD_CODIGO al principio
             self.df_resultados = self.df_resultados[["DIGNIDAD_CODIGO"]+[col for col in self.df_resultados.columns if col != "DIGNIDAD_CODIGO"]]
             
         # en df_dignidades_codes se encuentran los códigos de las dignidades, hacer un merge con el DataFrame de resultados
@@ -325,6 +348,20 @@ class Standarized_Results:
         return self.df_resultados
     
     def put_standar_geo_codes_results(self,drop_old=False):
+        """ 
+        Pone los códigos geográficos estandarizados en el DataFrame de resultados
+        
+        Parameters
+        ----------
+        drop_old: bool
+            Si es True, se eliminan las columnas que terminan con "_OLD"
+        Returns
+        -------
+        - df_resultados: pd.DataFrame
+            DataFrame con los códigos geográficos estandarizados
+            
+        """
+    
         # cargar a las parroquias estandarizadas
         std_parroquias = self.load_std_data("parroquias/std_parroquias.csv")
         # hacer un merge con el DataFrame de resultados, en std parroquias la columna es PARROQUIA_CODIGO_OLD, en resultados es PARROQUIA_CODIGO
@@ -347,7 +384,7 @@ class Standarized_Results:
         # ordenar las columnas
         self.df_resultados = self.df_resultados[columnas_ordenadas]
         #encode the columns to int
-        #if the dignidad_codigo column has NaN values, replace them with 0
+        #si hay valores nulos, se reemplazan por 0
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna(0)
         
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
@@ -406,7 +443,6 @@ class Standarized_Results:
         df_eleccion = self.df_resultados.copy()
         # in df_eleccion we want to drop the columns that are in columnas_de_votacion and are not in columnas_de_eleccion
         columnas_no_ele = [col for col in df_eleccion.columns if col not in columnas_de_eleccion]
-        print(columnas_no_ele)
         df_eleccion = df_eleccion.drop(columns=columnas_no_ele)
         return df_votacion, df_eleccion
         

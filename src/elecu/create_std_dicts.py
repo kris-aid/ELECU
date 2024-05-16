@@ -67,7 +67,6 @@ class Standard_Dictionaries:
         # Construir el path del archivo
         file_path = os.path.join(self.standarized_folder, file)
         # Leer el archivo en un DataFrame
-        print(file_path)
         df = pd.read_csv(file_path)
         return df
         
@@ -145,15 +144,6 @@ class Standard_Dictionaries:
                            "DIGNIDAD_NOMBRE":["PRESIDENCIA", "PREFECTURA", "CONCEJO RURAL", "ALCALDIA", "CONCEJO URBANO", "JUNTA PARROQUIAL", "ASAMBLEA PROVINCIAL", "PARLAMENTO ANDINO", "ASAMBLEA NACIONAL", "ASAMBLEA CIRCUNSCRIPCION", "CPCCS M", "CPCCS H", "CPCCS NAC/EXT"],
                             "DIGNIDAD_AMBITO":["NACIONAL", "PROVINCIAL", "CANTONAL", "CANTONAL", "CANTONAL", "PARROQUIAL", "PROVINCIAL", "NACIONAL", "NACIONAL", "PROVINCIAL", "NACIONAL", "NACIONAL", "NACIONAL"]}
         
-        #pd.DataFrame(dict_dignidades_std_post_2007).to_csv("data_csv/Codigos_estandar/dignidades/dignidades_std_post_2007.csv", index=False)
-        #pd.DataFrame(dict_dignidades_std_pre_2007).to_csv("data_csv/Codigos_estandar/dignidades/dignidades_std_pre_2007.csv", index=False)
-        
-        # Hay un problema en ciertos años. Los códigos de las dignidades no son los mismos que los del diccionario o que los nombres de las dignidades no son los mismos que los del diccionario
-        # Vamos a tener un diccionario de las equivalencias de los nombres de las dignidades
-        # Por ejemplo si el nombre de la dignidad es PRESIDENTA/E Y VICEPRESIDENTA/E o PRESIDENTE Y VICEPRESIDENTE vamos a cambiarlo a PRESIDENCIA
-        # Si el nombre de la dignidad es CONCEJALES RURALES vamos a cambiarlo a CONCEJO RURAL
-        # Si el nombre de la dignidad es ALCALDES o ALCALDE MUNICIPAL o ALCALDES MUNICIPALES o ALCANCESA/ALCALDE vamos a cambiarlo a ALCALDIA
-        # Si el nombre de la dignidad es CONCEJALES MUNICIPALES vamos a cambiarlo a CONCEJO MUNICIPAL
         
         dict_equivalencias= {
                     "PRESIDENCIA": ["PRESIDENTA/E Y VICEPRESIDENTA/E", "PRESIDENTE Y VICEPRESIDENTE"],
@@ -172,17 +162,6 @@ class Standard_Dictionaries:
                     "CPCCS H": ["CPCCS (HOMBRES)"],
                     "CPCCS NAC/EXT": ["CPCCS (NAC/EXT)"]}
                     
-        # # Find the maximum length among all lists
-        # max_length = max(len(lst) for lst in dict_equivalencias.values())
-
-        # # Fill shorter lists with NaN to make them equal length
-        # for key, value in dict_equivalencias.items():
-        #     dict_equivalencias[key] = value + [float('nan')] * (max_length - len(value))
-
-        # # Create a DataFrame
-        # df = pd.DataFrame.from_dict(dict_equivalencias, orient='index')
-        # df.T.to_csv("data_csv/Codigos_estandar/dignidades/equivalencias_dignidades_T.csv", index=True)
-        
         #Vamos a cambiar los nombres de las dignidades
         #Primero vamos a cambiar los nombres de las dignidades que no son los mismos que los del diccionario
         for key, value in dict_equivalencias.items():
@@ -279,14 +258,7 @@ class Standard_Dictionaries:
             "EUROPA, ASIA, OCEANIA": ["EUROPA" , "ASIA, OCEANIA", "EUROPA ASIA OCEANIA", "EUROPA, ASIA Y OCEANIA","EUROPA ASIA Y OCEANIA","EUROPA, OCEANIA Y ASIA"],
             "VOTO EXTERIOR": ["VOTO EXTERIOR"],
             "ECUADOR": ["ECUADOR","NACION"]}
-        #fill the dictionary with NaN to make them equal length
-        # Find the maximum length among all lists
-        # max_length = max(len(lst) for lst in dict_equivalencias_exterior.values())
-        # # Fill shorter lists with NaN to make them equal length
-        # for key, value in dict_equivalencias_exterior.items():
-        #     dict_equivalencias_exterior[key] = value + [float('nan')] * (max_length - len(value))
-        # # Create a DataFrame   
-        #pd.DataFrame(dict_equivalencias_exterior).to_csv("data_csv/Codigos_estandar/provincias/equivalencias_exterior.csv", index=False)
+ 
         
         dict_provincias= { "PROVINCIA_CODIGO":["P00","P01","P02","P03","P04","P05","P06","P07","P08","P09","P10",
                                                "P11","P12","P13","P14","P15","P16","P17","P18","P19","P20","P21","P22","P23","P24","P25","P26","P27","P28"],
@@ -295,7 +267,6 @@ class Standard_Dictionaries:
                            "PROVINCIA_CODIGO_OLD":[0,1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                                                    11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28]}      
         
-        #pd.DataFrame(dict_provincias).to_csv("data_csv/Codigos_estandar/provincias/provincias_std.csv", index=False)
         
         #Vamos a cambiar los nombres de las dignidades
         #Primero vamos a cambiar los nombres de las dignidades que no son los mismos que los del diccionario
@@ -310,7 +281,6 @@ class Standard_Dictionaries:
         self.df_provincias["PROVINCIA_CODIGO_OLD"] = self.df_provincias["PROVINCIA_CODIGO_x"]
         # Eliminamos las columnas que no necesitamos
         self.df_provincias = self.df_provincias.drop(columns=["PROVINCIA_CODIGO_x", "PROVINCIA_CODIGO_y", "ANIO"])
-        #print(self.df_provincias)
         
     def recuperar_cantones(self):
         '''

@@ -1,12 +1,9 @@
 # ELECU
-Elections-Ecuador (ELECU) es un proyecto de codigo abierto basado en Python diseniado para mejorar la accesibilidad y el analisis de los resultados electorales oficiales en Ecuador. Este proyecto proporciona una biblioteca de Python para recuperar y analizar eficientemente los resultados de las elecciones de Ecuador. La informacion oficial es proporcionada por el Consejo Nacional Electoral del Ecuador.
-# Descripcion
-
-
+Elections-Ecuador (ELECU) es un proyecto de codigo abierto basado en Python diseniado para mejorar la accesibilidad y el analisis de los resultados electorales oficiales en Ecuador. Este proyecto proporciona una biblioteca de Python para recuperar y analizar eficientemente los resultados de las elecciones de Ecuador. La informacion oficial es proporcionada por el Consejo Nacional Electoral del Ecuador. Este proyecto es parte del USFQ Datahub y es mantenido por Kristian Mendoza.
 
 Para mas informacion revisar el documento de [Contexto](assests/Context.md)
 # Datos Oficiales
-Los datos oficiales son proporcionados por el Consejo Nacional Electoral del Ecuador.
+Los datos oficiales son proporcionados por el Consejo Nacional Electoral del Ecuador. Los datos oficiales son de dominio publico. Los datos no pueden ser descargados en un solo archivo comprimido
 
 ## Descarga
 Los datos oficiales se encuentran disponibles en el [portal de datos abiertos del CNE](https://www.cne.gob.ec/estadisticas/bases-de-datos/)
@@ -30,6 +27,8 @@ pip install elecu
 
 ```python
 import elecu
+
+
 ```
 
 
@@ -70,4 +69,4 @@ el USFQ Datahub,
 y a todos los que han contribuido al proyecto.
 
 
-# Informacion Legal
+

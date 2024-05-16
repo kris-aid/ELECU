@@ -45,3 +45,22 @@ def convert_sav_to_csv(input_folder, output_folder):
 
                 print(f"Converted {input_file_path} to {output_file_path}")
     return None
+
+def get_data(link, download_folder):
+    """
+    Función que obtiene los datos de un archivo comprimido en la web y los guarda en un directorio local.
+    (Trabajo en progreso)
+    
+    
+    Parameters
+    ----------
+        - link: str
+            URL del archivo comprimido
+        - download_folder: str
+            Directorio donde se guardarán los archivos descargados
+
+    Returns
+    -------
+    None
+    """
+    #Trabajo en progreso
