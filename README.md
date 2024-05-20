@@ -15,6 +15,8 @@ Los datos oficiales se encuentran disponibles en el [portal de datos abiertos de
 ## Procesamiento
 ## Lugar de Almacenamiento de los Datos Procesados
 
+Los datos en csv se pueden encontrar en este link: [one drive](https://1drv.ms/u/c/a3b43506a6454ca5/EVkqeT3B5n1Ht-nKxWtywHoBqd44ciFnw730UGPQ5aU76A?e=QCoAJ9)
+
 # Requisitos
 Python 3.7 o superior, compatible con Pandas, Numpy, Geopandas, Matplotlib, Seaborn, entre otros.
 
