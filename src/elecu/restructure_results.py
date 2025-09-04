@@ -30,7 +30,7 @@ class Standarized_Results:
             self.standarized_folder = "../data/Codigos_estandar/"
         else:
             self.standarized_folder = standarized_folder
-        
+        self.year = input_folder[-4:]
         self.input_folder = input_folder   
         self.df_registro = self.recuperar_registro()
         self.df_resultados = self.recuperar_resultados()   
@@ -218,8 +218,59 @@ class Standarized_Results:
         self.df_registro = self.df_registro[columnas_ordenadas]
         self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
         
-        return self.df_registro 
-    
+        return self.df_registro
+
+    def put_standar_geo_codes_registro_canton(self, year,drop_old=False):
+        """
+        Pone los códigos geográficos estandarizados en el DataFrame de registro para cantones
+        Parameters
+        ----------
+        year: int
+            Año de la elección
+
+        drop_old: bool
+            Si es True, se eliminan las columnas que terminan con "_OLD"
+        Returns
+        -------
+        - df_registro: pd.DataFrame
+            DataFrame con los códigos geográficos estandarizados
+
+        """
+
+        # cargar a los cantones estandarizados
+        if year == 2009 or year == 2013:
+            std_cantones = self.load_std_data("cantones/std_cantones_2009_2013.csv")
+        else:
+            std_cantones = self.load_std_data("cantones/std_cantones.csv")
+
+        # hacer un merge con el DataFrame de resultados, en std cantones la columna es CANTON_CODIGO_OLD, en resultados es CANTON_CODIGO
+        self.df_registro = pd.merge(self.df_registro, std_cantones, left_on="CANTON_CODIGO",
+                                    right_on="CANTON_CODIGO_OLD", how="left")
+
+        # Renombrar las columnas que tienen "_x" al final con "_OLD" al final
+        columns_to_rename_old = {col: col[:-2] + "_OLD" for col in self.df_registro.columns if col.endswith("_x")}
+        self.df_registro.rename(columns=columns_to_rename_old, inplace=True)
+
+        old_columns = [col for col in self.df_registro.columns if col.endswith("_OLD")]
+
+        # Si drop_old es True, se eliminan las columnas que terminan con "_OLD"
+        if drop_old == True:
+            self.df_registro.drop(columns=old_columns, axis=1, inplace=True)
+
+        # Renombrar las columnas que tienen "_y" al final con "" al final
+        columns_to_rename = {col: col[:-2] for col in self.df_registro.columns if col.endswith("_y")}
+        self.df_registro.rename(columns=columns_to_rename, inplace=True)
+
+        # Ordenar las columnas
+        columnas_ordenadas = ["PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO"] + [col for col in
+                                                                                                  self.df_registro.columns
+                                                                                                  if col.startswith(
+                "ELECTORES")] + ["TOTAL ELECTORES"]
+        self.df_registro = self.df_registro[columnas_ordenadas]
+        self.df_registro.sort_values(by=["PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO"], inplace=True)
+
+        return self.df_registro
+
     def recuperar_resultados(self):
         '''
         Recupera los resultados de los archivos de resultados.
@@ -388,12 +439,81 @@ class Standarized_Results:
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna(0)
         
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
+        self.df_resultados["VOTOS"].fillna(0, inplace=True)
         self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
         self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
         self.df_resultados["NULOS"] = self.df_resultados["NULOS"].astype(int)
         return self.df_resultados
-        
-    
+
+    def put_standar_geo_codes_results_cantones(self,year, drop_old=False):
+        """
+        Pone los códigos geográficos estandarizados en el DataFrame de resultados
+
+        Parameters
+        ----------
+        year : int
+            Año de la elección
+        drop_old: bool
+            Si es True, se eliminan las columnas que terminan con "_OLD"
+        Returns
+        -------
+        - df_resultados: pd.DataFrame
+            DataFrame con los códigos geográficos estandarizados
+
+        """
+
+        # cargar a las cantonces estandarizadas
+        if year ==2009 or year == 2013:
+            std_cantones = self.load_std_data("cantones/std_cantones_2009_2013.csv")
+        else:
+            std_cantones = self.load_std_data("cantones/std_cantones.csv")
+
+        # hacer un merge con el DataFrame de resultados, en std cantonces la columna es CANTON_CODIGO_OLD, en resultados es CANTON_CODIGO
+        self.df_resultados = pd.merge(self.df_resultados, std_cantones, left_on="CANTON_CODIGO",
+                                      right_on="CANTON_CODIGO_OLD", how="left")
+        # rename the columns that have "_x" at the end with "_OLD" at the end
+
+        columns_to_rename_old = {col: col[:-2] + "_OLD" for col in self.df_resultados.columns if col.endswith("_x")}
+        self.df_resultados.rename(columns=columns_to_rename_old, inplace=True)
+
+        old_columns = [col for col in self.df_resultados.columns if col.endswith("_OLD")]
+        if drop_old == True:
+            self.df_resultados.drop(columns=old_columns, axis=1, inplace=True)
+        # rename columns with "_y" at the end
+        columns_to_rename = {col: col[:-2] for col in self.df_resultados.columns if col.endswith("_y")}
+        self.df_resultados.rename(columns=columns_to_rename, inplace=True)
+
+        columnas_ordenadas = ["DIGNIDAD_CODIGO", "PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO"] + [col for col
+                                                                                                             in
+                                                                                                             self.df_resultados
+                                                                                                             if
+                                                                                                             col.startswith(
+                                                                                                                 "CIRCUNSCRIPCION")] + [
+                                 col for col in self.df_resultados.columns if col.startswith("CANDIDATO_")] + [col for
+                                                                                                               col in
+                                                                                                               self.df_resultados.columns
+                                                                                                               if
+                                                                                                               col.startswith(
+                                                                                                                   "OP_")] + [
+                                 "SEXO", 'BLANCOS', 'NULOS', "VOTOS", 'VUELTA']
+        if drop_old == False:
+            columnas_ordenadas = columnas_ordenadas + old_columns
+        # ordenar las columnas
+        self.df_resultados = self.df_resultados[columnas_ordenadas]
+        # encode the columns to int
+        # si hay valores nulos, se reemplazan por 0
+        #print the row with null values in DIGNIDAD_CODIGO
+        #print(self.df_resultados[self.df_resultados["DIGNIDAD_CODIGO"].isnull()])
+
+        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna(0)
+
+        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
+        self.df_resultados["VOTOS"].fillna(0, inplace=True)
+        self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
+        self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
+        self.df_resultados["NULOS"] = self.df_resultados["NULOS"].astype(int)
+        return self.df_resultados
+
     def divide_resultados(self):
         '''
         Divide los resultados en dos DataFrames: uno con los resultados de la votación y otro con la elección de candidatos.
@@ -439,7 +559,51 @@ class Standarized_Results:
             
         
         df_votacion= self.df_resultados[columnas_de_votacion].copy()
-        df_votacion= df_votacion.drop_duplicates(subset=columnas_de_votacion, keep='first')
+        df_votacion.sort_values(["BLANCOS","NULOS"], ascending=False, inplace=True)
+        #if year is 2017 or later
+        df_votacion["PARROQUIA_CODIGO"] = df_votacion["PARROQUIA_CODIGO"].astype(int)
+        if int(self.year) >= 2017:
+            problematic_parroquia = 6150 # Replace with actual parroquia_codigo
+            df_problematic = df_votacion[df_votacion["PARROQUIA_CODIGO"] == problematic_parroquia]
+
+            df_problematic = df_votacion[
+                (df_votacion["PARROQUIA_CODIGO"] == problematic_parroquia) & (df_votacion["DIGNIDAD_CODIGO"] == 1)]
+            df_others = df_votacion[
+                ~((df_votacion["PARROQUIA_CODIGO"] == problematic_parroquia) & (df_votacion["DIGNIDAD_CODIGO"] == 1))]
+
+
+            df_problematic= df_problematic.drop_duplicates(subset=["DIGNIDAD_CODIGO","PARROQUIA_CODIGO","SEXO","VUELTA","CIRCUNSCRIPCION_CODIGO"], keep='first')
+            # If DIGNIDAD_CODIGO is 1 for the problematic parroquia, group by SEXO and VUELTA, summing BLANCOS and NULOS
+            if not df_problematic.empty:
+                df_problematic_grouped = (
+                    df_problematic
+                    .groupby(["DIGNIDAD_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VUELTA"], as_index=False)
+                    .agg({"BLANCOS": "sum", "NULOS": "sum", "CIRCUNSCRIPCION_CODIGO": "first"})
+                )
+
+                df_problematic_grouped["PROVINCIA_CODIGO"] = df_problematic["PROVINCIA_CODIGO"].iloc[0]
+                df_problematic_grouped["CANTON_CODIGO"] = df_problematic["CANTON_CODIGO"].iloc[0]
+                df_problematic_grouped["CIRCUNSCRIPCION_NOMBRE"] = df_problematic["CIRCUNSCRIPCION_NOMBRE"].iloc[0]
+
+                # Drop duplicates in the non-problematic data
+                df_others = df_others.drop_duplicates(subset=["DIGNIDAD_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VUELTA"],
+                                                      keep="first")
+
+                # Combine the grouped problematic data back with the rest
+                df_votacion = pd.concat([df_others, df_problematic_grouped], ignore_index=True)
+            else:
+                # If no special case, just use the original data
+                df_votacion = pd.concat([df_others, df_problematic], ignore_index=True)
+
+
+
+
+
+            # Combine the grouped problematic data back with the rest
+            df_votacion = pd.concat([df_others, df_problematic_grouped], ignore_index=True)
+        else:
+            df_votacion = df_votacion.drop_duplicates(subset=["DIGNIDAD_CODIGO","PARROQUIA_CODIGO","SEXO","VUELTA"], keep='first')
+        #df_votacion= df_votacion.drop_duplicates(subset=columnas_de_votacion, keep='first')
         df_eleccion = self.df_resultados.copy()
         # in df_eleccion we want to drop the columns that are in columnas_de_votacion and are not in columnas_de_eleccion
         columnas_no_ele = [col for col in df_eleccion.columns if col not in columnas_de_eleccion]
