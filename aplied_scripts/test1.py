@@ -1,6 +1,6 @@
 #%%
 import pandas as pd
-from src.elecu.extract_values import extract_eleccion
+from elecu.elecu.extract_values import extract_eleccion
 #%%
 #
 #%%
@@ -17,7 +17,7 @@ def test_create_std_dicts():
     std_dicts.change_to_std_parroquias()
     print(std_dicts.df_parroquias)
 #%%
-from src.elecu.restructure_results import Standarized_Results
+from elecu.elecu.restructure_results import Standarized_Results
 def test_standarized_registro(year=2023):
     input_folder = f"../../data_csv/generales/{year}"
     standarized_folder = "data/Codigos_estandar/"
@@ -46,7 +46,7 @@ def test_standarized_resultados(year=2023):
     # test_2023_eleccion.to_csv("../../tests/test_results/test_2023_eleccion.csv", index=False)
 
 
-from src.elecu.extract_values import extract_eleccion
+from elecu.elecu.extract_values import extract_eleccion
 
 def test_extract_eleccion(year=2023):
 
@@ -58,7 +58,7 @@ def test_extract_eleccion(year=2023):
     print(df_resultados_filtered.columns)
 #%%
 
-from src.elecu.visualize_results import visualize_results_presidentes
+from elecu.elecu.visualize_results import visualize_results_presidentes
 def test_visualize_results():
     df_resultados = pd.read_csv("../../tests/test_results/test_2023_eleccion.csv")
     df_resultados = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo="P01",agrupar_por_territorio="PROVINCIA", sexo="AMBOS", vuelta=1)

@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np
 import os
-    #get the current directory
-current_directory = os.path.dirname(os.path.abspath(__file__))
-# establishes it as the current directory
-os.chdir(current_directory)
+#     #get the current directory
+# current_directory = os.path.dirname(os.path.abspath(__file__))
+# # establishes it as the current directory
+# os.chdir(current_directory)
 def extract_eleccion(df_resultados,dignidad_codigo=None,territorio_codigo=None,agrupar_por_territorio=None,sexo=None,vuelta=None):
     """
     Extrae los valores de la elección de acuerdo a los parámetros de entrada

@@ -4,9 +4,9 @@ import os
 import matplotlib.pyplot as plt
 import seaborn as sns
 #get the current directory
-current_directory = os.path.dirname(os.path.abspath(__file__))
-# establishes it as the current directory
-os.chdir(current_directory)
+# current_directory = os.path.dirname(os.path.abspath(__file__))
+# # establishes it as the current directory
+# os.chdir(current_directory)
 
 def visualize_results_presidentes(df_resultados, bar_plot=False, pie_plot=False):
     """

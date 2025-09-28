@@ -1,10 +1,10 @@
 #%%
-import src.elecu.restructure_results
-import src.elecu.extract_values
-import src.elecu.visualize_results
-from src.elecu.extract_values import extract_eleccion, extract_votacion
+import elecu.restructure_results
+import elecu.extract_values
+import elecu.visualize_results
+from elecu.extract_values import extract_eleccion, extract_votacion
 import pandas as pd
-from src.elecu.restructure_results import Standarized_Results
+from elecu.restructure_results import Standarized_Results
 
 
 #%%
@@ -33,7 +33,7 @@ def test_standarized_resultados(year=2023):
     test_year_votacion, test_year_eleccion = standarized_results.divide_resultados()
     return test_year_votacion, test_year_eleccion,test
 #%%
-from src.elecu.extract_values import extract_eleccion, extract_votacion
+from elecu.extract_values import extract_eleccion, extract_votacion
 
 year=2023
 test_year_votacion,test_year_eleccion,_=test_standarized_resultados(year)
