@@ -177,7 +177,9 @@ class Standarized_Results:
         
         #ordenar by PROVINCIA_CODIGO, CANTON_CODIGO, PARROQUIA_CODIGO, SEXO
         self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
-        
+        for col in self.df_registro.columns:
+            if "CODIGO" in col:
+                self.df_registro[col] = self.df_registro[col].astype(str)
         return self.df_registro
     
     def put_standar_geo_codes_registro(self,drop_old=False):
@@ -244,7 +246,11 @@ class Standarized_Results:
             std_cantones = load_std_data("cantones/std_cantones_2009_2013.csv")
         else:
             std_cantones = load_std_data("cantones/std_cantones.csv")
-
+        
+        for col in std_cantones.columns:
+           if "CODIGO" in col:
+                std_cantones[col] = std_cantones[col].astype(str)
+            
         # hacer un merge con el DataFrame de resultados, en std cantones la columna es CANTON_CODIGO_OLD, en resultados es CANTON_CODIGO
         self.df_registro = pd.merge(self.df_registro, std_cantones, left_on="CANTON_CODIGO",
                                     right_on="CANTON_CODIGO_OLD", how="left")
@@ -397,6 +403,9 @@ class Standarized_Results:
         self.df_resultados.drop("DIGNIDAD_AMBITO", axis=1, inplace=True)
         self.df_resultados.drop("DIGNIDAD_CODIGO_x", axis=1, inplace=True)
         self.df_resultados.rename(columns={'DIGNIDAD_CODIGO_y': 'DIGNIDAD_CODIGO'}, inplace=True)       
+        for col in self.df_resultados.columns:
+            if "CODIGO" in col:
+                self.df_resultados[col] = self.df_resultados[col].astype(str)
             
         return self.df_resultados
     
@@ -465,10 +474,17 @@ class Standarized_Results:
         """
 
         # cargar a las cantonces estandarizadas
-        if year ==2009 or year == 2013:
+       
+        # cargar a los cantones estandarizados
+        if year == 2009 or year == 2013:
             std_cantones = load_std_data("cantones/std_cantones_2009_2013.csv")
         else:
             std_cantones = load_std_data("cantones/std_cantones.csv")
+        
+        for col in std_cantones.columns:
+            if "CODIGO" in col:
+                std_cantones[col] = std_cantones[col].astype(str)
+            
 
         # hacer un merge con el DataFrame de resultados, en std cantonces la columna es CANTON_CODIGO_OLD, en resultados es CANTON_CODIGO
         self.df_resultados = pd.merge(self.df_resultados, std_cantones, left_on="CANTON_CODIGO",
@@ -507,9 +523,9 @@ class Standarized_Results:
         #print the row with null values in DIGNIDAD_CODIGO
         #print(self.df_resultados[self.df_resultados["DIGNIDAD_CODIGO"].isnull()])
 
-        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna(0)
+        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna("0")
 
-        self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
+        #self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
         self.df_resultados["VOTOS"].fillna(0, inplace=True)
         self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
         self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
@@ -563,46 +579,55 @@ class Standarized_Results:
         df_votacion= self.df_resultados[columnas_de_votacion].copy()
         df_votacion.sort_values(["BLANCOS","NULOS"], ascending=False, inplace=True)
         #if year is 2017 or later
-        df_votacion["PARROQUIA_CODIGO"] = df_votacion["PARROQUIA_CODIGO"].astype(int)
+        #df_votacion["PARROQUIA_CODIGO"] = df_votacion["PARROQUIA_CODIGO"].astype(int)
         if int(self.year) >= 2017:
-            problematic_parroquia = 6150 # Replace with actual parroquia_codigo
-            df_problematic = df_votacion[df_votacion["PARROQUIA_CODIGO"] == problematic_parroquia]
+            df_votacion_partes= pd.DataFrame()
+            problematic_parroquia = "6150.0"
+            # Tratar el caso especial de la parroquia 6150. Esta parroquia existe en dos circunscripciones diferentes,
+            # por lo que se debe agrupar los datos de esta parroquia ignorando la circunscripción.
+            dignidades_this_election =df_votacion["DIGNIDAD_CODIGO"].dropna().unique()
+            # quitar los valores "10" porque son de asamblea circunscripción
+            dignidades_this_election = [dignidad for dignidad in dignidades_this_election if dignidad != "10"]
+            # add the info of the dignidad 10 of the parroquia 6150 to the df
+            df_votacion_dignidad_10= df_votacion[(df_votacion["DIGNIDAD_CODIGO"] == "10")]
+            df_votacion_dignidad_10= df_votacion_dignidad_10.drop_duplicates(subset=["DIGNIDAD_CODIGO","PARROQUIA_CODIGO","SEXO","VUELTA"], keep='first')
+            df_votacion_partes= pd.concat([df_votacion_partes, df_votacion_dignidad_10], ignore_index=True)
+            
+            for DIGNIDAD_CODIGO in dignidades_this_election:
+                df_votacion_dignidad = df_votacion[df_votacion["DIGNIDAD_CODIGO"] == DIGNIDAD_CODIGO]
+                df_problematic = df_votacion_dignidad[
+                    (df_votacion_dignidad["PARROQUIA_CODIGO"] == problematic_parroquia) & (df_votacion_dignidad["DIGNIDAD_CODIGO"] == DIGNIDAD_CODIGO)]
+                df_others = df_votacion_dignidad[
+                    ~((df_votacion_dignidad["PARROQUIA_CODIGO"] == problematic_parroquia) & (df_votacion_dignidad["DIGNIDAD_CODIGO"] == DIGNIDAD_CODIGO))]
 
-            df_problematic = df_votacion[
-                (df_votacion["PARROQUIA_CODIGO"] == problematic_parroquia) & (df_votacion["DIGNIDAD_CODIGO"] == 1)]
-            df_others = df_votacion[
-                ~((df_votacion["PARROQUIA_CODIGO"] == problematic_parroquia) & (df_votacion["DIGNIDAD_CODIGO"] == 1))]
-
-
-            df_problematic= df_problematic.drop_duplicates(subset=["DIGNIDAD_CODIGO","PARROQUIA_CODIGO","SEXO","VUELTA","CIRCUNSCRIPCION_CODIGO"], keep='first')
-            # If DIGNIDAD_CODIGO is 1 for the problematic parroquia, group by SEXO and VUELTA, summing BLANCOS and NULOS
-            if not df_problematic.empty:
-                df_problematic_grouped = (
-                    df_problematic
-                    .groupby(["DIGNIDAD_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VUELTA"], as_index=False)
-                    .agg({"BLANCOS": "sum", "NULOS": "sum", "CIRCUNSCRIPCION_CODIGO": "first"})
-                )
-
-                df_problematic_grouped["PROVINCIA_CODIGO"] = df_problematic["PROVINCIA_CODIGO"].iloc[0]
-                df_problematic_grouped["CANTON_CODIGO"] = df_problematic["CANTON_CODIGO"].iloc[0]
-                df_problematic_grouped["CIRCUNSCRIPCION_NOMBRE"] = df_problematic["CIRCUNSCRIPCION_NOMBRE"].iloc[0]
-
-                # Drop duplicates in the non-problematic data
+                #Drop duplicates in the non-problematic data
                 df_others = df_others.drop_duplicates(subset=["DIGNIDAD_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VUELTA"],
-                                                      keep="first")
+                                                        keep="first")
+
+                df_problematic= df_problematic.drop_duplicates(subset=["DIGNIDAD_CODIGO","PARROQUIA_CODIGO","SEXO","VUELTA","CIRCUNSCRIPCION_CODIGO"], keep='first')
+                # If DIGNIDAD_CODIGO is 1 for the problematic parroquia, group by SEXO and VUELTA, summing BLANCOS and NULOS
+                if not df_problematic.empty:
+                    df_problematic_grouped = (
+                        df_problematic
+                        .groupby(["DIGNIDAD_CODIGO", "PARROQUIA_CODIGO", "SEXO", "VUELTA"], as_index=False)
+                        .agg({"BLANCOS": "sum", "NULOS": "sum", "CIRCUNSCRIPCION_CODIGO": "first"})
+                    )
+
+                    df_problematic_grouped["PROVINCIA_CODIGO"] = df_problematic["PROVINCIA_CODIGO"].iloc[0]
+                    df_problematic_grouped["CANTON_CODIGO"] = df_problematic["CANTON_CODIGO"].iloc[0]
+                    df_problematic_grouped["CIRCUNSCRIPCION_NOMBRE"] = df_problematic["CIRCUNSCRIPCION_NOMBRE"].iloc[0]
+
+                    # 
+                    # Combine the grouped problematic data back with the rest
+                    df_votacion_dignidad = pd.concat([df_others, df_problematic_grouped], ignore_index=True)
+                else:
+                    # If no special case, just use the original data
+                    df_votacion_dignidad = pd.concat([df_others, df_problematic], ignore_index=True)
+                df_votacion_partes= pd.concat([df_votacion_partes, df_votacion_dignidad], ignore_index=True)                
+            df_votacion= df_votacion_partes.copy()
 
                 # Combine the grouped problematic data back with the rest
-                df_votacion = pd.concat([df_others, df_problematic_grouped], ignore_index=True)
-            else:
-                # If no special case, just use the original data
-                df_votacion = pd.concat([df_others, df_problematic], ignore_index=True)
-
-
-
-
-
-            # Combine the grouped problematic data back with the rest
-            df_votacion = pd.concat([df_others, df_problematic_grouped], ignore_index=True)
+                # df_votacion = pd.concat([df_others, df_problematic_grouped], ignore_index=True)
         else:
             df_votacion = df_votacion.drop_duplicates(subset=["DIGNIDAD_CODIGO","PARROQUIA_CODIGO","SEXO","VUELTA"], keep='first')
         #df_votacion= df_votacion.drop_duplicates(subset=columnas_de_votacion, keep='first')

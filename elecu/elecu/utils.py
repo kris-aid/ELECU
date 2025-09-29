@@ -54,13 +54,38 @@ def load_std_data(resource_path):
 
     # 3. Use files() for a modern, path-like object approach (Python 3.9+)
     #    This handles subdirectories better than open_text()
+    package_name = 'elecu.data.Codigos_estandar'
     resource = importlib.resources.files(package_name) / resource_path
-    if resource_path=="provincias/equivalencias_exterior.csv":
-        septator=";"
-    else:
-        septator=","
-    # The 'resource' variable is now a pathlib.Path object pointing to the file.
-    with resource.open('r') as archivo:
-        df = pd.read_csv(archivo, sep=septator,encoding='latin-1')
+    
+    sep = ';' if resource_path == "provincias/equivalencias_exterior.csv" else ','
 
-    return df
+    # Intento con varios encodings típicos
+    for enc in ('utf-8-sig', 'latin-1', 'cp1252'):
+        try:
+            return pd.read_csv(
+                resource,                # << Path, no file handle
+                sep=sep,
+                encoding=enc,
+                engine='python',
+                quotechar='"',
+                on_bad_lines='skip',
+                dtype=str,
+                keep_default_na=False,
+                skipinitialspace=True
+            )
+        except UnicodeDecodeError:
+            continue
+
+    # Último recurso: reemplazar caracteres inválidos
+    return pd.read_csv(
+        resource,
+        sep=sep,
+        encoding='latin-1',
+        engine='python',
+        quotechar='"',
+        on_bad_lines='skip',
+        dtype=str,
+        keep_default_na=False,
+        skipinitialspace=True,
+        encoding_errors='replace'  # pandas >=2.0
+    )
