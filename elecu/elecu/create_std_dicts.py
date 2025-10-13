@@ -306,6 +306,7 @@ class Standard_Dictionaries:
         else:
             df=load_std_data("cantones/std_cantones_2009_2013.csv")
         # Vamos a hacer un left join con el DataFrame de los cantones estandarizados
+        self.df_cantones["CANTON_CODIGO"] = self.df_cantones["CANTON_CODIGO"].astype(str)
         self.df_cantones = self.df_cantones.merge(df, left_on="CANTON_CODIGO",right_on="CANTON_CODIGO_OLD", how="left")
         #quitar las columnas que no necesitamos
         for col in self.df_cantones.columns:
@@ -392,7 +393,7 @@ class Standard_Dictionaries:
         else:
             print("No está estandarizado, utilizar con cuidado")
         # Vamos a hacer un left join con el DataFrame de los cantones estandarizados
-        
+        self.df_parroquias["PARROQUIA_CODIGO"] = self.df_parroquias["PARROQUIA_CODIGO"].astype(str)
         self.df_parroquias = self.df_parroquias.merge(df, left_on="PARROQUIA_CODIGO",right_on="PARROQUIA_CODIGO_OLD", how="left")
         # si parroquia codigo _y es nulo, print that row
         missing_parroquias = self.df_parroquias[self.df_parroquias["PARROQUIA_CODIGO_y"].isnull()]
