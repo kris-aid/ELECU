@@ -6,11 +6,12 @@ from elecu.extract_values import extract_eleccion, extract_votacion
 import pandas as pd
 from elecu.restructure_results import Standarized_Results
 
-
+import os
+print(os.getcwd())
 #%%
 def test_standarized_registro(year=2023):
-    input_folder = f"../../data_csv/generales/{year}"
-    standarized_folder = "data/Codigos_estandar/"
+    input_folder = f"../data/data_csv/generales/{year}"
+    standarized_folder = None#"data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
 
     #print(standarized_results.df_registro)
@@ -23,8 +24,8 @@ def test_standarized_registro(year=2023):
 
 
 def test_standarized_resultados(year=2023):
-    input_folder = f"../../data_csv/generales/{year}"
-    standarized_folder = "data/Codigos_estandar/"
+    input_folder = f"../data/data_csv/generales/{year}"
+    standarized_folder = None #"data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
     #print(standarized_results.df_resultados)
     standarized_results.change_resultados()
@@ -35,7 +36,7 @@ def test_standarized_resultados(year=2023):
 #%%
 from elecu.extract_values import extract_eleccion, extract_votacion
 
-year=2023
+year=2025
 test_year_votacion,test_year_eleccion,_=test_standarized_resultados(year)
 
 test_year_votacion_extract=extract_votacion(test_year_votacion,territorio_codigo="EC09",agrupar_por_territorio="CANTON",sexo="AGRUPAR",vuelta="1")

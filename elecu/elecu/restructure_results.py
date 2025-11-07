@@ -17,7 +17,7 @@ class Standarized_Results:
     
     
     '''
-    def __init__(self, input_folder, standarized_folder=None):
+    def __init__(self, input_folder, standarized_folder=None,consulta=False):
         '''
         Inicializa la clase Standarized_Results.
         
@@ -33,9 +33,12 @@ class Standarized_Results:
         else:
             self.standarized_folder = standarized_folder
         self.year = input_folder[-4:]
-        self.input_folder = input_folder   
+        self.input_folder = input_folder
         self.df_registro = self.recuperar_registro()
-        self.df_resultados = self.recuperar_resultados()   
+        if consulta==False:
+            self.df_resultados = self.recuperar_resultados()   
+        else:
+            self.df_resultados = self.recuperar_resultados_consulta()
           
         
     def load_std_data(self,file):
@@ -303,6 +306,8 @@ class Standarized_Results:
                         df["VUELTA"] = vuelta
                         df_resultados = pd.concat([df_resultados, df])
         return df_resultados
+    
+    
     
     def change_resultados(self):
         '''
@@ -638,3 +643,214 @@ class Standarized_Results:
         return df_votacion, df_eleccion
         
         
+    def recuperar_resultados_consulta(self):
+        '''
+        Recupera los resultados de los archivos de resultados de consulta popular.
+        
+        Returns
+        -------
+            - df_resultados: pd.DataFrame
+                DataFrame con los resultados de los archivos de resultados raw
+        '''
+        df_resultados = pd.DataFrame()
+        for root, dirs, files in os.walk(self.input_folder):
+            for file in files:
+                if file.endswith(".csv"):
+                    if file.startswith("resultados"):
+                        # Construir el path del archivo
+                        file_path = os.path.join(root, file)
+                        # Leer el archivo en un DataFrame
+                        df = pd.read_csv(file_path)
+                        df.columns = [unidecode.unidecode(col) for col in df.columns]
+                        df["VUELTA"] = "1"
+                        df_resultados = pd.concat([df_resultados, df])
+        return df_resultados
+    
+    
+    
+    def change_resultados_consulta(self):
+        '''
+        Cambia los resultados de los archivos de resultados.
+        
+        Returns
+        -------
+            - df_resultados: pd.DataFrame
+                DataFrame con los resultados de los archivos de resultados estandarizados
+                
+        '''
+        anio=self.input_folder[-4:]
+        # Cambiar el nombre de las columnas
+        self.df_resultados.columns = [unidecode.unidecode(col) for col in self.df_resultados.columns]
+
+        #Colocar el nombre correcto de las columna SEXO
+        if 'SEX_JUNTA'  in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'SEX_JUNTA': 'SEXO'}, inplace=True)
+        elif 'JUNTA_SEXO' in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'JUNTA_SEXO': 'SEXO'}, inplace=True)  
+        elif 'SEXO' in self.df_resultados.columns:
+            pass    
+        self.df_resultados['SEXO'] = self.df_resultados['SEXO'].astype(str)
+        
+        
+        # Colocar el nombre correcto de las columnas de blancos y nulos
+        if "VOTOS_EN_BLANCO" in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'VOTOS_EN_BLANCO': 'BLANCOS'}, inplace=True)
+        else:
+            pass
+        
+        if "VOTOS_NULOS" in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'VOTOS_NULOS': 'NULOS'}, inplace=True)
+        else:
+            pass
+        
+        # colocar el nombre del codigo de candidato
+        if 'NUMERO_PREGUNTA' in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'NUMERO_PREGUNTA': 'PREGUNTA_CODIGO'}, inplace=True)
+        else:
+            pass
+        # Colocar el nombre de la columna de votos
+        if 'VOTOS' in self.df_resultados.columns:
+            pass
+        elif 'CANDIDATO_VOTOS' in self.df_resultados.columns:
+            self.df_resultados.rename(columns={'CANDIDATO_VOTOS': 'VOTOS'}, inplace=True)
+        
+        
+        
+        #drop columns if they are present
+        if 'NUMERO_DE_ACTAS' in self.df_resultados.columns:
+            self.df_resultados.drop("NUMERO_DE_ACTAS", axis=1, inplace=True)
+        if 'NUMERO_DE_JUNTAS' in self.df_resultados.columns:
+            self.df_resultados.drop("NUMERO_DE_JUNTAS", axis=1, inplace=True)
+            
+            
+        #Colocar los nombres correctos de la columna sexo
+        df_sexo_names = load_std_data("resultados/sexo_names_std.csv")
+        sex_mapping = create_dict_mapping(df_sexo_names)
+        self.df_resultados['SEXO'] = self.df_resultados['SEXO'].map(sex_mapping)       
+        for col in self.df_resultados.columns:
+            if "CODIGO" in col:
+                self.df_resultados[col] = self.df_resultados[col].astype(str)
+            
+        return self.df_resultados
+    
+
+        
+
+    def put_standar_geo_codes_results_cantones_consulta(self,year, drop_old=False):
+        """
+        Pone los códigos geográficos estandarizados en el DataFrame de resultados
+
+        Parameters
+        ----------
+        year : int
+            Año de la elección
+        drop_old: bool
+            Si es True, se eliminan las columnas que terminan con "_OLD"
+        Returns
+        -------
+        - df_resultados: pd.DataFrame
+            DataFrame con los códigos geográficos estandarizados
+
+        """
+
+        # cargar a las cantonces estandarizadas
+       
+        # cargar a los cantones estandarizados
+        if year == 2009 or year == 2013:
+            std_cantones = load_std_data("cantones/std_cantones_2009_2013.csv")
+        else:
+            std_cantones = load_std_data("cantones/std_cantones.csv")
+        
+        for col in std_cantones.columns:
+            if "CODIGO" in col:
+                std_cantones[col] = std_cantones[col].astype(str)
+            
+
+        # hacer un merge con el DataFrame de resultados, en std cantonces la columna es CANTON_CODIGO_OLD, en resultados es CANTON_CODIGO
+        self.df_resultados = pd.merge(self.df_resultados, std_cantones, left_on="CANTON_CODIGO",
+                                      right_on="CANTON_CODIGO_OLD", how="left")
+        # rename the columns that have "_x" at the end with "_OLD" at the end
+
+        columns_to_rename_old = {col: col[:-2] + "_OLD" for col in self.df_resultados.columns if col.endswith("_x")}
+        self.df_resultados.rename(columns=columns_to_rename_old, inplace=True)
+
+        old_columns = [col for col in self.df_resultados.columns if col.endswith("_OLD")]
+        if drop_old == True:
+            self.df_resultados.drop(columns=old_columns, axis=1, inplace=True)
+        # rename columns with "_y" at the end
+        columns_to_rename = {col: col[:-2] for col in self.df_resultados.columns if col.endswith("_y")}
+        self.df_resultados.rename(columns=columns_to_rename, inplace=True)
+
+        columnas_ordenadas = ["PREGUNTA_NOMBRE", "PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO"] + [col for col
+                                                                                                             in
+                                                                                                             self.df_resultados
+                                                                                                             if
+                                                                                                             col.startswith(
+                                                                                                                 "CIRCUNSCRIPCION")] + [col for
+                                                                                                               col in
+                                                                                                               self.df_resultados.columns
+                                                                                                               if
+                                                                                                               col.startswith(
+                                                                                                                   "OPCION_")] + [
+                                 "SEXO", 'BLANCOS', 'NULOS', "VOTOS", 'VUELTA']
+        if drop_old == False:
+            columnas_ordenadas = columnas_ordenadas + old_columns
+        # ordenar las columnas
+        self.df_resultados = self.df_resultados[columnas_ordenadas]
+        # encode the columns to int
+        # si hay valores nulos, se reemplazan por 0
+        #print the row with null values in DIGNIDAD_CODIGO
+        #print(self.df_resultados[self.df_resultados["DIGNIDAD_CODIGO"].isnull()])
+
+
+        #self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
+        self.df_resultados["VOTOS"].fillna(0, inplace=True)
+        self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
+        self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
+        self.df_resultados["NULOS"] = self.df_resultados["NULOS"].astype(int)
+        return self.df_resultados
+
+    def divide_resultados_consulta(self):
+        '''
+        Divide los resultados en dos DataFrames: uno con los resultados de la votación y otro con la elección de candidatos.
+        
+        Returns
+        -------
+            - df_votacion: pd.DataFrame
+                DataFrame con los resultados de la votación.
+            - df_eleccion: pd.DataFrame
+                DataFrame con la elección de candidatos.
+        
+        '''
+        # se va a utilizar las columnas de la tabla de resultados para dividir en dos DataFrames 
+        columnas_de_votacion = ["PREGUNTA_NOMBRE","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO", 'BLANCOS', 'NULOS','VUELTA']
+        columnas_de_eleccion = ["PREGUNTA_NOMBRE","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO","OPCION_NOMBRE", "VOTOS", 'VUELTA']
+        # preserve the columns if they are present
+        if 'SUFRAGANTES' in self.df_resultados.columns:
+            columnas_de_votacion.append('SUFRAGANTES')
+        
+            
+        self.df_resultados.sort_values(["CANTON_CODIGO","PARROQUIA_CODIGO","PREGUNTA_NOMBRE"], ascending=[True,True,True], inplace=True)
+        df_votacion= self.df_resultados[columnas_de_votacion].copy()
+        
+    
+        df_votacion = df_votacion.drop_duplicates(subset=["PREGUNTA_NOMBRE","PARROQUIA_CODIGO","SEXO","VUELTA"], keep='first')
+        #df_votacion= df_votacion.drop_duplicates(subset=columnas_de_votacion, keep='first')
+        df_eleccion = self.df_resultados.copy()
+        # in df_eleccion we want to drop the columns that are in columnas_de_votacion and are not in columnas_de_eleccion
+        columnas_no_ele = [col for col in df_eleccion.columns if col not in columnas_de_eleccion]
+        df_eleccion = df_eleccion.drop(columns=columnas_no_ele)
+
+        # " La columna OPCION_NOMBRE  tiene dos valores "SI y NO", quiero tener dos columnas, una de "VOTOS_SI" y otra de "VOTOS_NO
+        # para eso, hago un pivot_table
+        pivot_df = df_eleccion.pivot_table(index=["PREGUNTA_NOMBRE","PROVINCIA_CODIGO", "CANTON_CODIGO", "PARROQUIA_CODIGO", "SEXO","VUELTA"],
+                                            columns="OPCION_NOMBRE",
+                                            values="VOTOS",
+                                            aggfunc='sum',
+                                            fill_value=0).reset_index()
+        # Renombrar las columnas
+        pivot_df.columns.name = None  # Eliminar el nombre del índice de columnas
+        pivot_df.rename(columns=lambda x: f"VOTOS_{x}" if x in ['SI', 'NO'] else x, inplace=True)
+        df_eleccion = pivot_df.copy()
+        return df_votacion, df_eleccion
+     

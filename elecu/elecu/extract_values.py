@@ -59,6 +59,8 @@ def extract_eleccion(df_resultados,dignidad_codigo=None,territorio_codigo=None,a
             df_resultados = df_resultados[df_resultados['CANTON_CODIGO'] == territorio_codigo]
         elif len(territorio_codigo) == 8:  # EC + 6 digits (Parroquias)
             df_resultados = df_resultados[df_resultados['PARROQUIA_CODIGO'] == territorio_codigo]
+    else:
+        pass
 
     if agrupar_por_territorio is not None:
         if agrupar_por_territorio == 'PAIS':

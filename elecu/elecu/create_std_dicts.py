@@ -413,3 +413,4 @@ class Standard_Dictionaries:
         # ordenar las columnas
         self.df_parroquias = self.df_parroquias[["PROVINCIA_CODIGO","PROVINCIA_NOMBRE","CANTON_CODIGO","CANTON_NOMBRE","PARROQUIA_CODIGO","PARROQUIA_CODIGO_OLD","PARROQUIA_NOMBRE","PARROQUIA_ESTADO"]]
         return self.df_parroquias
+    

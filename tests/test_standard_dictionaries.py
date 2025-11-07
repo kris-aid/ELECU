@@ -1,10 +1,10 @@
 from elecu import *
 
-input_folder = "data/csv_files/generales/2025"
+input_folder = "data/csv_files/consultas_y_referendums/2024"
 std_dicts = Standard_Dictionaries(input_folder)
-print(std_dicts.df_dignidades)
-std_dicts.change_to_std_dignidades()
-print(std_dicts.df_dignidades)
+# print(std_dicts.df_dignidades)
+# std_dicts.change_to_std_dignidades()
+# print(std_dicts.df_dignidades)
 
 print(std_dicts.df_provincias)
 std_dicts.change_to_std_provincias()
