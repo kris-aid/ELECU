@@ -9,8 +9,8 @@ from elecu.restructure_results import Standarized_Results
 
 #%%
 def test_standarized_registro(year=2023):
-    input_folder = f"../../data_csv/generales/{year}"
-    standarized_folder = "data/Codigos_estandar/"
+    input_folder = f"../data/csv_files/generales/{year}"
+    standarized_folder = "elecu/elecu/data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
 
     #print(standarized_results.df_registro)
@@ -23,8 +23,8 @@ def test_standarized_registro(year=2023):
 
 
 def test_standarized_resultados(year=2023):
-    input_folder = f"../../data_csv/generales/{year}"
-    standarized_folder = "data/Codigos_estandar/"
+    input_folder = f"../data/csv_files/generales/{year}"
+    standarized_folder = "elecu/elecu/data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
     #print(standarized_results.df_resultados)
     standarized_results.change_resultados()
@@ -48,7 +48,7 @@ test_year_votacion_EC0901.loc["TOTAL"]=test_year_votacion_EC0901.sum()
 
 
 #%%
-year_2023=pd.read_csv("../../data_csv/generales/2023/resultados/resultados_2023_v_1.csv")
+year_2023=pd.read_csv("../data/csv_files/generales/2023/resultados/resultados_2023_v_1.csv")
 #%%
 year_2023=year_2023[year_2023["CANTON_CODIGO"]==390.0]
 year_2023["DIGNIDAD_CODIGO"]=year_2023["DIGNIDAD_CODIGO"].astype(str)
@@ -109,7 +109,7 @@ def extract_presidentes_names_and_votos(year=2023,vuelta="1",territorio="PROVINC
     #print(presidentes_year.head())
     candidato_nombre_opciones=["CANDIDATO_NOMBRE","CANDIDATO_NOMBRE_RESULTADOS"]
     if "CANDIDATO_CODIGO" in presidentes_year.columns:
-        candidatos_path=f"../../data_csv/generales/{year}/organizaciones_politicas/candidatos_{year}.csv"
+        candidatos_path=f"../data/csv_files/generales/{year}/organizaciones_politicas/candidatos_{year}.csv"
         candidatos_df=pd.read_csv(candidatos_path)
 
         for candidato_nombre_opcion in candidato_nombre_opciones:
@@ -123,7 +123,7 @@ def extract_presidentes_names_and_votos(year=2023,vuelta="1",territorio="PROVINC
         print("CANDIDATO_NOMBRE already in the dataframe")
 
     if "OP_CODIGO" in presidentes_year.columns:
-        organizaciones_path=f"../../data_csv/generales/{year}/organizaciones_politicas/organizaciones_politicas_{year}.csv"
+        organizaciones_path=f"../data/csv_files/generales/{year}/organizaciones_politicas/organizaciones_politicas_{year}.csv"
         organizaciones_df=pd.read_csv(organizaciones_path)
         #organizaciones_df=organizaciones_df.rename(columns={"OP_CODIGO":"OP_CODIGO_ORG"})
         organizaciones_df=organizaciones_df[["OP_CODIGO","OP_NOMBRE"]]
@@ -145,8 +145,8 @@ def extract_presidentes_names_and_votos(year=2023,vuelta="1",territorio="PROVINC
         columns_territorio=["CANTON_CODIGO","CANTON_NOMBRE"]
 
     df_presidentes = pd.read_csv("data/Codigos_estandar/dignidades/presidentes_equivalencias.csv")
-    input_folder = f"../../data_csv/generales/{year}"
-    standarized_folder = "data/Codigos_estandar/"
+    input_folder = f"../data/csv_files/generales/{year}"
+    standarized_folder = "elecu/elecu/data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
     dict = standarized_results.create_dict_mapping(df_presidentes)
     presidentes_year["CANDIDATO_NOMBRE"] = presidentes_year["CANDIDATO_NOMBRE"].map(dict)
@@ -249,7 +249,7 @@ presidentes_votacion=extract_presidentes_names_and_votos(2023,"1",territorio="CA
 presidentes_votacion.head()
 #%% retrieve the years on the folder of the data_csv/generales exists
 import os
-years=os.listdir("../../data_csv/generales")
+years=os.listdir("../data/csv_files/generales")
 years=[int(year) for year in years]
 years.sort()
 provincias_path="data/Codigos_estandar/provincias/std_provincias.csv"
@@ -674,7 +674,10 @@ candidatos_presidenciales={
             "XAVIER HERVAS","PEDRO FREILE","CESAR MONTUFAR","YAKU PEREZ","GIOVANNY ANDRADE","GUSTAVO LARREA",
             "GUILLERMO LASSO","GUILLERMO CELI","JUAN FERNANDO VELASCO","PAUL CARRASCO","XIMENA PENA"],
     2023: ["YAKU PEREZ","DANIEL NOBOA","LUISA GONZALEZ","JAN TOPIC","OTTO SONNENHOLZNER","BOLIVAR ARMIJOS","FERNANDO VILLAVICENCIO",
-            "XAVIER HERVAS"]
+            "XAVIER HERVAS"],
+    2025: ["ANDREA GONZALEZ","CARLOS RABASCALL","DANIEL NOBOA AZIN","ENRIQUE GOMEZ","FRANCESCO TABACCHI",
+            "HENRY CUCALON","HENRY KRONFLE KOZHAYA","IVAN SAQUICELA","JIMMY JAIRALA VALLAZZA","JORGE ESCALA",
+            "JUAN IVAN CUEVA","LEONIDAS IZA","LUIS FELIPE TILLERIA","LUISA GONZALEZ","PEDRO GRANJA","VICTOR ARAUS"]
 
 }
 #%%
@@ -717,7 +720,10 @@ candidatos_presidenciales={
             "XAVIER HERVAS","PEDRO FREILE","CESAR MONTUFAR","YAKU PEREZ","GIOVANNY ANDRADE","GUSTAVO LARREA",
             "GUILLERMO LASSO","GUILLERMO CELI","JUAN FERNANDO VELASCO","PAUL CARRASCO","XIMENA PENA"],
     2023: ["YAKU PEREZ","DANIEL NOBOA","LUISA GONZALEZ","JAN TOPIC","OTTO SONNENHOLZNER","BOLIVAR ARMIJOS","FERNANDO VILLAVICENCIO",
-            "XAVIER HERVAS"]
+            "XAVIER HERVAS"],
+    2025: ["ANDREA GONZALEZ","CARLOS RABASCALL","DANIEL NOBOA AZIN","ENRIQUE GOMEZ","FRANCESCO TABACCHI",
+            "HENRY CUCALON","HENRY KRONFLE KOZHAYA","IVAN SAQUICELA","JIMMY JAIRALA VALLAZZA","JORGE ESCALA",
+            "JUAN IVAN CUEVA","LEONIDAS IZA","LUIS FELIPE TILLERIA","LUISA GONZALEZ","PEDRO GRANJA","VICTOR ARAUS"]
 
 }
 #%% Function to process votes dynamically
