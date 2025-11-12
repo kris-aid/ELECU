@@ -1,6 +1,16 @@
+# Datos y entornos
 /data
+/data_csv
+.venv
 .python-version
 poetry.lock
 pyproject.toml
-/data_csv
-.venv
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Metadatos de paquetes
+*.egg-info/
