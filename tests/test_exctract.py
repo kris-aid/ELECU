@@ -125,6 +125,10 @@ def extract_resultados_cantonal(year=2025, tipo="generales", save_csv=True):
         df_eleccion_completo = pd.concat(dfs_eleccion)
         df_votacion_completo = pd.concat(dfs_votacion)
         
+        # Añadir columna AÑO
+        df_eleccion_completo['AÑO'] = year
+        df_votacion_completo['AÑO'] = year
+        
         df_eleccion_completo.to_csv(f"test_results/eleccion_cantonal_todas_vueltas_{year}.csv", index=False)
         df_votacion_completo.to_csv(f"test_results/votacion_cantonal_todas_vueltas_{year}.csv", index=False)
         
@@ -138,9 +142,12 @@ def extract_resultados_cantonal(year=2025, tipo="generales", save_csv=True):
         
         # Aplanar nombres de columnas multinivel
         df_eleccion_ancho.columns = [
-            f"{col[1]}_{col[0]}" if col[1] else col[0] 
+            f"{col[1]}_{col[0]}" if col[1] and col[0] else col[0] 
             for col in df_eleccion_ancho.columns
         ]
+        
+        # Añadir columna AÑO
+        df_eleccion_ancho['AÑO'] = year
         
         df_eleccion_ancho.to_csv(f"test_results/eleccion_cantonal_formato_ancho_{year}.csv", index=False)
         
