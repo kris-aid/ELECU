@@ -171,10 +171,10 @@ class Standarized_Results:
         self.df_registro['TOTAL ELECTORES'] = self.df_registro[[col for col in self.df_registro.columns if 'ELECTORES' in col]].sum(axis=1)
         
         # si hay valores nulos, se reemplazan por 0
-        self.df_registro.fillna(0, inplace=True)
-        
+        self.df_registro = self.df_registro.fillna(0)
+
         self.df_registro = self.df_registro[["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"]+[col for col in self.df_registro.columns if col.startswith("ELECTORES")]+["TOTAL ELECTORES"]]
-        
+
         #ordenar by PROVINCIA_CODIGO, CANTON_CODIGO, PARROQUIA_CODIGO, SEXO
         self.df_registro.sort_values(by=["PROVINCIA_CODIGO","CANTON_CODIGO","PARROQUIA_CODIGO","SEXO"], inplace=True)
         for col in self.df_registro.columns:
@@ -446,11 +446,11 @@ class Standarized_Results:
         # ordenar las columnas
         self.df_resultados = self.df_resultados[columnas_ordenadas]
         #encode the columns to int
-        #si hay valores nulos, se reemplazan por 0
+        # si hay valores nulos, se reemplazan por 0
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna(0)
-        
+
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
-        self.df_resultados["VOTOS"].fillna(0, inplace=True)
+        self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].fillna(0)
         self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
         self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
         self.df_resultados["NULOS"] = self.df_resultados["NULOS"].astype(int)
@@ -520,13 +520,13 @@ class Standarized_Results:
         self.df_resultados = self.df_resultados[columnas_ordenadas]
         # encode the columns to int
         # si hay valores nulos, se reemplazan por 0
-        #print the row with null values in DIGNIDAD_CODIGO
-        #print(self.df_resultados[self.df_resultados["DIGNIDAD_CODIGO"].isnull()])
+        # print the row with null values in DIGNIDAD_CODIGO
+        # print(self.df_resultados[self.df_resultados["DIGNIDAD_CODIGO"].isnull()])
 
         self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].fillna("0")
 
-        #self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
-        self.df_resultados["VOTOS"].fillna(0, inplace=True)
+        # self.df_resultados["DIGNIDAD_CODIGO"] = self.df_resultados["DIGNIDAD_CODIGO"].astype(int)
+        self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].fillna(0)
         self.df_resultados["VOTOS"] = self.df_resultados["VOTOS"].astype(int)
         self.df_resultados["BLANCOS"] = self.df_resultados["BLANCOS"].astype(int)
         self.df_resultados["NULOS"] = self.df_resultados["NULOS"].astype(int)

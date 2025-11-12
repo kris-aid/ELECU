@@ -32,5 +32,6 @@ if __name__ == "__main__":
     print(os.getcwd())
     registro=test_standarized_registro(2023)
     votacion,eleccion=test_standarized_resultados(2023)
+    print("end")
     
     

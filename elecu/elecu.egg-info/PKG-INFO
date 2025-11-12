@@ -1,0 +1,22 @@
+Metadata-Version: 2.4
+Name: elecu
+Version: 0.0.1
+Summary: A Python library for retrieving and analyzing electoral results in Ecuador from CNE
+Author: Kristian Mendoza
+Author-email: saidmendoza730@gmail.com
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: numpy
+Requires-Dist: unidecode
+Requires-Dist: seaborn
+Requires-Dist: folium
+Requires-Dist: geopandas
+Requires-Dist: pyreadstat
+Dynamic: author
+Dynamic: author-email
+Dynamic: description
+Dynamic: requires-dist
+Dynamic: summary
+
+
+"Open-ELEC is a Python-based open-source project designed to enhance the accessibility and analysis of official electoral results in Ecuador. This project provides a Python library for efficiently retrieving and analyzing election outcomes from the CNE (Consejo Nacional Electoral)"

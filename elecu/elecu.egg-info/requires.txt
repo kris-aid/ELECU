@@ -1,0 +1,8 @@
+pandas
+matplotlib
+numpy
+unidecode
+seaborn
+folium
+geopandas
+pyreadstat
