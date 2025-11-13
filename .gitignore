@@ -14,3 +14,5 @@ __pycache__/
 
 # Metadatos de paquetes
 *.egg-info/
+*.idea/
+
