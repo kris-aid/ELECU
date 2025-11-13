@@ -141,34 +141,43 @@ class Standarized_Results:
         elif 'G_EDAD' in self.df_registro.columns:
             pass
         
-        #convert the column G_EDAD to string
-        self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].astype(str)
+        # Only convert G_EDAD to string if the column exists
+        if 'G_EDAD' in self.df_registro.columns:
+            self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].astype(str)
     
         # Colocar el nombre correcto de la columna SEXO
         if 'SEXO' in self.df_registro.columns:
             pass
         elif 'JUNTA_SEXO' in self.df_registro.columns:
             self.df_registro.rename(columns={'JUNTA_SEXO': 'SEXO'}, inplace=True)
+        else:
+            # If neither SEXO nor JUNTA_SEXO exists, something is wrong - add a log
+            print(f"Warning: Neither 'SEXO' nor 'JUNTA_SEXO' found in registro columns: {list(self.df_registro.columns)}")
             
         #ahora se colocan los nombres correctos de las columnas de sexo
-        df_sexo_names = load_std_data("registro_electoral/sexo_names_std.csv")
-        sexo_mapping=create_dict_mapping(df_sexo_names)
-        self.df_registro['SEXO'] = self.df_registro['SEXO'].map(sexo_mapping)
+        if 'SEXO' in self.df_registro.columns:
+            df_sexo_names = self.load_std_data("registro_electoral/sexo_names_std.csv")
+            sexo_mapping = self.create_dict_mapping(df_sexo_names)
+            self.df_registro['SEXO'] = self.df_registro['SEXO'].map(sexo_mapping)
         
         # Colocar el nombre correcto de las columnas de electores
-        df_electores_names = load_std_data("registro_electoral/electores_names_std.csv")
-        electores_mapping=create_dict_mapping(df_electores_names)
-        self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].map(electores_mapping)
+        if 'G_EDAD' in self.df_registro.columns:
+            df_electores_names = self.load_std_data("registro_electoral/electores_names_std.csv")
+            electores_mapping = self.create_dict_mapping(df_electores_names)
+            self.df_registro['G_EDAD'] = self.df_registro['G_EDAD'].map(electores_mapping)
         
-        #drop la columna ANIO
-        self.df_registro.drop("ANIO", axis=1, inplace=True)
+        #drop la columna ANIO  
+        if 'ANIO' in self.df_registro.columns:
+            self.df_registro.drop("ANIO", axis=1, inplace=True)
        
         # Se va a pivotear el DataFrame para que las columnas sean los grupos de edad
-        self.df_registro = self.df_registro.pivot_table(index=self.df_registro.columns.difference(['G_EDAD','ELECTORES']).tolist(), columns='G_EDAD', values='ELECTORES', aggfunc='first').reset_index()
+        if 'G_EDAD' in self.df_registro.columns and 'ELECTORES' in self.df_registro.columns:
+            self.df_registro = self.df_registro.pivot_table(index=self.df_registro.columns.difference(['G_EDAD','ELECTORES']).tolist(), columns='G_EDAD', values='ELECTORES', aggfunc='first').reset_index()
         
         # Ahora se suma el valor de los electores por cada fila para obtener el total
         # se suman las columnas que empiezan con ELECTORES
-        self.df_registro['TOTAL ELECTORES'] = self.df_registro[[col for col in self.df_registro.columns if 'ELECTORES' in col]].sum(axis=1)
+        if any('ELECTORES' in col for col in self.df_registro.columns):
+            self.df_registro['TOTAL ELECTORES'] = self.df_registro[[col for col in self.df_registro.columns if 'ELECTORES' in col]].sum(axis=1)
         
         # si hay valores nulos, se reemplazan por 0
         self.df_registro.fillna(0, inplace=True)
@@ -197,7 +206,7 @@ class Standarized_Results:
         """
         
         # cargar a las parroquias estandarizadas
-        std_parroquias = load_std_data("parroquias/std_parroquias.csv")
+        std_parroquias = self.load_std_data("parroquias/std_parroquias.csv")
         
         # hacer un merge con el DataFrame de resultados, en std parroquias la columna es PARROQUIA_CODIGO_OLD, en resultados es PARROQUIA_CODIGO
         self.df_registro = pd.merge(self.df_registro, std_parroquias, left_on="PARROQUIA_CODIGO", right_on="PARROQUIA_CODIGO_OLD", how="left")
@@ -243,9 +252,9 @@ class Standarized_Results:
 
         # cargar a los cantones estandarizados
         if year == 2009 or year == 2013:
-            std_cantones = load_std_data("cantones/std_cantones_2009_2013.csv")
+            std_cantones = self.load_std_data("cantones/std_cantones_2009_2013.csv")
         else:
-            std_cantones = load_std_data("cantones/std_cantones.csv")
+            std_cantones = self.load_std_data("cantones/std_cantones.csv")
         
         for col in std_cantones.columns:
            if "CODIGO" in col:
@@ -362,18 +371,18 @@ class Standarized_Results:
             
             
         #Colocar los nombres correctos de la columna sexo
-        df_sexo_names = load_std_data("resultados/sexo_names_std.csv")
-        sex_mapping = create_dict_mapping(df_sexo_names)
+        df_sexo_names = self.load_std_data("resultados/sexo_names_std.csv")
+        sex_mapping = self.create_dict_mapping(df_sexo_names)
         self.df_resultados['SEXO'] = self.df_resultados['SEXO'].map(sex_mapping) 
 
         
         # Si el anio es menor a 2007, se carga el diccionario de dignidades pre 2007
         if int(anio) < 2007:
-            df_dignidades_codes = load_std_data("dignidades/std_dignidades_pre_2007.csv")
+            df_dignidades_codes = self.load_std_data("dignidades/std_dignidades_pre_2007.csv")
             
         # Si el anio es mayor o igual a 2007, se carga el diccionario de dignidades post 2007
         else:
-            df_dignidades_codes = load_std_data("dignidades/std_dignidades_post_2007.csv")
+            df_dignidades_codes = self.load_std_data("dignidades/std_dignidades_post_2007.csv")
         
         if "DIGNIDAD_NOMBRE" not in self.df_resultados.columns:
             #El anio son los ultimos 4 caracteres de la carpeta de entrada
@@ -387,8 +396,8 @@ class Standarized_Results:
             
         #Unidecode la columna DIGNIDAD_NOMBRE
         self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].apply(unidecode.unidecode)  
-        df_dignidades_names = load_std_data("dignidades/equivalencias_dignidades.csv")
-        map_dignidades =create_dict_mapping(df_dignidades_names)
+        df_dignidades_names = self.load_std_data("dignidades/equivalencias_dignidades.csv")
+        map_dignidades = self.create_dict_mapping(df_dignidades_names)
         self.df_resultados['DIGNIDAD_NOMBRE'] = self.df_resultados['DIGNIDAD_NOMBRE'].map(map_dignidades)
        
         # Si no existe la columna DIGNIDAD_CODIGO, se crea una columna DIGNIDAD_CODIGO con valores NaN
@@ -425,7 +434,7 @@ class Standarized_Results:
         """
     
         # cargar a las parroquias estandarizadas
-        std_parroquias = load_std_data("parroquias/std_parroquias.csv")
+        std_parroquias = self.load_std_data("parroquias/std_parroquias.csv")
         # hacer un merge con el DataFrame de resultados, en std parroquias la columna es PARROQUIA_CODIGO_OLD, en resultados es PARROQUIA_CODIGO
         self.df_resultados = pd.merge(self.df_resultados, std_parroquias, left_on="PARROQUIA_CODIGO", right_on="PARROQUIA_CODIGO_OLD", how="left")
         # rename the columns that have "_x" at the end with "_OLD" at the end
@@ -477,9 +486,9 @@ class Standarized_Results:
        
         # cargar a los cantones estandarizados
         if year == 2009 or year == 2013:
-            std_cantones = load_std_data("cantones/std_cantones_2009_2013.csv")
+            std_cantones = self.load_std_data("cantones/std_cantones_2009_2013.csv")
         else:
-            std_cantones = load_std_data("cantones/std_cantones.csv")
+            std_cantones = self.load_std_data("cantones/std_cantones.csv")
         
         for col in std_cantones.columns:
             if "CODIGO" in col:

@@ -1,10 +1,12 @@
 #%%
-import elecu.restructure_results
-import elecu.extract_values
-import elecu.visualize_results
-from elecu.extract_values import extract_eleccion, extract_votacion
+import sys
+import os
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..'))
+
+from elecu.elecu import restructure_results, extract_values, visualize_results
+from elecu.elecu.extract_values import extract_eleccion, extract_votacion
 import pandas as pd
-from elecu.restructure_results import Standarized_Results
+from elecu.elecu.restructure_results import Standarized_Results
 
 
 #%%
@@ -32,67 +34,65 @@ def test_standarized_resultados(year=2023):
     test = standarized_results.put_standar_geo_codes_results_cantones(drop_old=True,year=year)
     test_year_votacion, test_year_eleccion = standarized_results.divide_resultados()
     return test_year_votacion, test_year_eleccion,test
-#%%
-from elecu.extract_values import extract_eleccion, extract_votacion
+if False:
+    year=2023
+    test_year_votacion,test_year_eleccion,_=test_standarized_resultados(year)
 
-year=2023
-test_year_votacion,test_year_eleccion,_=test_standarized_resultados(year)
-
-test_year_votacion_extract=extract_votacion(test_year_votacion,territorio_codigo="EC09",agrupar_por_territorio="CANTON",sexo="AGRUPAR",vuelta="1")
+    test_year_votacion_extract=extract_votacion(test_year_votacion,territorio_codigo="EC09",agrupar_por_territorio="CANTON",sexo="AGRUPAR",vuelta="1")
 
 
-test_year_votacion_EC0901=test_year_votacion[test_year_votacion["CANTON_CODIGO"]=="EC0901"]
-test_year_votacion_EC0901=test_year_votacion_EC0901[test_year_votacion_EC0901["VUELTA"]=="1"]
-test_year_votacion_EC0901=test_year_votacion_EC0901[test_year_votacion_EC0901["DIGNIDAD_CODIGO"]==1]
-test_year_votacion_EC0901.loc["TOTAL"]=test_year_votacion_EC0901.sum()
+    test_year_votacion_EC0901=test_year_votacion[test_year_votacion["CANTON_CODIGO"]=="EC0901"]
+    test_year_votacion_EC0901=test_year_votacion_EC0901[test_year_votacion_EC0901["VUELTA"]=="1"]
+    test_year_votacion_EC0901=test_year_votacion_EC0901[test_year_votacion_EC0901["DIGNIDAD_CODIGO"]==1]
+    test_year_votacion_EC0901.loc["TOTAL"]=test_year_votacion_EC0901.sum()
 
 
-#%%
-year_2023=pd.read_csv("../data/csv_files/generales/2023/resultados/resultados_2023_v_1.csv")
-#%%
-year_2023=year_2023[year_2023["CANTON_CODIGO"]==390.0]
-year_2023["DIGNIDAD_CODIGO"]=year_2023["DIGNIDAD_CODIGO"].astype(str)
-#%% filter if there is a dignidad_codigo that contains 11
+    #%%
+    year_2023=pd.read_csv("../data/csv_files/generales/2023/resultados/resultados_2023_v_1.csv")
+    #%%
+    year_2023=year_2023[year_2023["CANTON_CODIGO"]==390.0]
+    year_2023["DIGNIDAD_CODIGO"]=year_2023["DIGNIDAD_CODIGO"].astype(str)
+    #%% filter if there is a dignidad_codigo that contains 11
 
-year_2023=year_2023[year_2023["DIGNIDAD_CODIGO"].str.contains("11")]
+    year_2023=year_2023[year_2023["DIGNIDAD_CODIGO"].str.contains("11")]
 
-#duplicated=year_2023[year_2023.duplicated(subset=["PARROQUIA_CODIGO","JUNTA_SEXO"],keep=False)]
-year_2023.drop_duplicates(subset=["PARROQUIA_CODIGO","JUNTA_SEXO"],keep="first",inplace=True)
-#%%
-year_2023.loc["TOTAL"]=year_2023.sum()
-#%%
-dict_sexo={"MASCULINO":"S0","FEMENINO":"S1"}
-year_2023["JUNTA_SEXO"]=year_2023["JUNTA_SEXO"].map(dict_sexo)
-#%%
-year_2023=year_2023.rename(columns={"JUNTA_SEXO":"SEXO"})
-#%%
-year_2023.loc["TOTAL"]=year_2023.sum()
+    #duplicated=year_2023[year_2023.duplicated(subset=["PARROQUIA_CODIGO","JUNTA_SEXO"],keep=False)]
+    year_2023.drop_duplicates(subset=["PARROQUIA_CODIGO","JUNTA_SEXO"],keep="first",inplace=True)
+    #%%
+    year_2023.loc["TOTAL"]=year_2023.sum()
+    #%%
+    dict_sexo={"MASCULINO":"S0","FEMENINO":"S1"}
+    year_2023["JUNTA_SEXO"]=year_2023["JUNTA_SEXO"].map(dict_sexo)
+    #%%
+    year_2023=year_2023.rename(columns={"JUNTA_SEXO":"SEXO"})
+    #%%
+    year_2023.loc["TOTAL"]=year_2023.sum()
 
-#%%
-comparative=pd.merge(year_2023[["PARROQUIA_CODIGO","SEXO","BLANCOS","NULOS"]],
-                     test_year_votacion_EC0901[["PARROQUIA_CODIGO","SEXO","BLANCOS","NULOS"]],
-                     on=["PARROQUIA_CODIGO","SEXO"],how="right",suffixes=("_me","_base"))
+    #%%
+    comparative=pd.merge(year_2023[["PARROQUIA_CODIGO","SEXO","BLANCOS","NULOS"]],
+                         test_year_votacion_EC0901[["PARROQUIA_CODIGO","SEXO","BLANCOS","NULOS"]],
+                         on=["PARROQUIA_CODIGO","SEXO"],how="right",suffixes=("_me","_base"))
 
 
 
-#%% put a row of total
-comparative.loc["TOTAL"]=comparative.sum()
+    #%% put a row of total
+    comparative.loc["TOTAL"]=comparative.sum()
 
 
-#%%
-def test_extract_eleccion(year=2023,df_resultados=None,vuelta="1",agrupar_por_territorio="PROVINCIA",territorio_codigo="EC01"):
+    #%%
+    def test_extract_eleccion(year=2023,df_resultados=None,vuelta="1",agrupar_por_territorio="PROVINCIA",territorio_codigo="EC01"):
 
-    # test with the 2023 results that are in the test folder
-    if df_resultados is None:
-        df_resultados = pd.read_csv(f"../../tests/test_results/test_{year}_eleccion.csv")
-    # Test 1: extract values for a specific dignidad
-    df_resultados_filtered = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo=territorio_codigo,agrupar_por_territorio=agrupar_por_territorio, sexo="AGRUPAR", vuelta=vuelta)
-    #print(df_resultados_filtered)
-    #print(df_resultados_filtered.columns)
-    return df_resultados_filtered
+        # test with the 2023 results that are in the test folder
+        if df_resultados is None:
+            df_resultados = pd.read_csv(f"../../tests/test_results/test_{year}_eleccion.csv")
+        # Test 1: extract values for a specific dignidad
+        df_resultados_filtered = extract_eleccion(df_resultados, dignidad_codigo=1, territorio_codigo=territorio_codigo,agrupar_por_territorio=agrupar_por_territorio, sexo="AGRUPAR", vuelta=vuelta)
+        #print(df_resultados_filtered)
+        #print(df_resultados_filtered.columns)
+        return df_resultados_filtered
 
-#%%
-test_year_eleccion=extract_eleccion(test_year_eleccion,territorio_codigo="EC09",agrupar_por_territorio="CANTON",sexo="AGRUPAR",vuelta="1")
+    #%%
+    test_year_eleccion=extract_eleccion(test_year_eleccion,territorio_codigo="EC09",agrupar_por_territorio="CANTON",sexo="AGRUPAR",vuelta="1")
 
 
 
@@ -131,20 +131,20 @@ def extract_presidentes_names_and_votos(year=2023,vuelta="1",territorio="PROVINC
         presidentes_year.drop(columns=["OP_CODIGO"],inplace=True)
 
     if territorio== "PROVINCIA":
-        provincias_path="data/Codigos_estandar/provincias/std_provincias.csv"
+        provincias_path="elecu/elecu/data/Codigos_estandar/provincias/std_provincias.csv"
         provincias_df=pd.read_csv(provincias_path)
         provincias_df=provincias_df[["PROVINCIA_CODIGO","PROVINCIA_NOMBRE"]]
         presidentes_year=pd.merge(presidentes_year,provincias_df,on="PROVINCIA_CODIGO",how="inner")
         columns_territorio=["PROVINCIA_CODIGO","PROVINCIA_NOMBRE"]
 
     if territorio== "CANTON":
-        cantones_path="data/Codigos_estandar/cantones/std_cantones.csv"
+        cantones_path="elecu/elecu/data/Codigos_estandar/cantones/std_cantones.csv"
         cantones_df=pd.read_csv(cantones_path)
         cantones_df=cantones_df[["CANTON_CODIGO","CANTON_NOMBRE"]]
         presidentes_year=pd.merge(presidentes_year,cantones_df,on="CANTON_CODIGO",how="inner")
         columns_territorio=["CANTON_CODIGO","CANTON_NOMBRE"]
 
-    df_presidentes = pd.read_csv("data/Codigos_estandar/dignidades/presidentes_equivalencias.csv")
+    df_presidentes = pd.read_csv("elecu/elecu/data/Codigos_estandar/dignidades/presidentes_equivalencias.csv")
     input_folder = f"../data/csv_files/generales/{year}"
     standarized_folder = "elecu/elecu/data/Codigos_estandar/"
     standarized_results = Standarized_Results(input_folder, standarized_folder)
@@ -229,7 +229,7 @@ def extract_presidentes_names_and_votos(year=2023,vuelta="1",territorio="PROVINC
 #%%
 
 #%%
-presidentes_votacion=extract_presidentes_names_and_votos(2023,"1",territorio="CANTON",territorio_codigo="EC09",sexo="AGRUPAR")
+# presidentes_votacion=extract_presidentes_names_and_votos(2023,"1",territorio="CANTON",territorio_codigo="EC09",sexo="AGRUPAR")
 #%%
 #%%
 # sexo="S0"
@@ -246,13 +246,13 @@ presidentes_votacion=extract_presidentes_names_and_votos(2023,"1",territorio="CA
 #     test_registro_year = test_registro.groupby(columnas_agrupar)['TOTAL ELECTORES'].sum().reset_index()
 
 #%%
-presidentes_votacion.head()
+# presidentes_votacion.head()
 #%% retrieve the years on the folder of the data_csv/generales exists
 import os
-years=os.listdir("../data/csv_files/generales")
-years=[int(year) for year in years]
+years=os.listdir("data/csv_files/generales")
+years=[int(year) for year in years if year.isdigit()]
 years.sort()
-provincias_path="data/Codigos_estandar/provincias/std_provincias.csv"
+provincias_path="elecu/elecu/data/Codigos_estandar/provincias/std_provincias.csv"
 provincias_df=pd.read_csv(provincias_path)
 # extract as a dictionary the PROVINCIAS_CODIGO and PROVINCIA_NOMBRE
 provincias_dict=provincias_df[["PROVINCIA_CODIGO","PROVINCIA_NOMBRE"]].set_index("PROVINCIA_CODIGO").to_dict()["PROVINCIA_NOMBRE"]
@@ -346,30 +346,10 @@ def merge_presidentes_votes_by_rounds(year, territorio, territorio_codigo):
 
 
 #%% Example usage
-final_df = merge_presidentes_votes_by_rounds(2002, territorio="CANTON", territorio_codigo="EC17")
-final_df.head()
+# final_df = merge_presidentes_votes_by_rounds(2002, territorio="CANTON", territorio_codigo="EC17")
+# final_df.head()
 
-#%% now we will iterate over all years and all provinces to generate the dataframes and concatenate them
-years = [2002, 2006, 2007]
-df_votaciones_total = pd.DataFrame()
-for year in years:
-    for codigo, provincia in provincias_dict.items():
-        print(f"Year: {year}, Provincia: {provincia}")
-        df_provincia = merge_presidentes_votes_by_rounds(year, territorio="CANTON", territorio_codigo=codigo)
-        df_votaciones_total = pd.concat([df_votaciones_total, df_provincia], ignore_index=True)
-#%%
-df_votaciones_total_2=df_votaciones_total.copy()
-years = [2009, 2013,2017,2021,2023]
-for year in years:
-    for codigo, provincia in provincias_dict.items():
-        print(f"Year: {year}, Provincia: {provincia}")
-        df_provincia = merge_presidentes_votes_by_rounds(year, territorio="CANTON", territorio_codigo=codigo)
-        df_votaciones_total_2 = pd.concat([df_votaciones_total_2, df_provincia], ignore_index=True)
-
-
-
-
-#%% electores is missing
+#%% the per-year processing is handled dynamically below (reads years from ../data/csv_files/generales)
 def add_electores_column(df_votaciones_total_2, year, territorio_codigo, sexo=None):
     test_registro = test_standarized_registro(year)
     columnas_agrupar = ['SEXO', territorio_codigo]
@@ -499,24 +479,43 @@ def add_electores_column_with_suffixes_not_agregated(year, territorio_codigo):
 
 #%%
 
-test_registro=test_standarized_registro(2017)
 #%%
-test_add_electores_column_with_suffixes_not_agregated = add_electores_column_with_suffixes_not_agregated(2017, "CANTON_CODIGO")
-#%%
-test_add_electores_column_with_suffixes= add_electores_column_with_suffixes(2017, "CANTON_CODIGO")
+# Build consolidated votation dataframe for all available years up to 2025
+# Read years from the data folder so the script processes every available election
+data_years_path = "data/csv_files/generales"
+available_years = []
+for name in os.listdir(data_years_path):
+    if name.isdigit():
+        y = int(name)
+        if y <= 2025:
+            available_years.append(y)
+available_years = sorted(available_years)
 
-#%%
-df_votaciones_total_2 = pd.read_csv("../../tests/Presidenciales/presidentes_votacion_cantonal_complete.csv")
+print(f"Processing years: {available_years}")
 
-#%%
-# Example usage to add TOTAL ELECTORES columns with suffixes to df_votaciones_total_2
-years = [2002, 2006,2009, 2013, 2017, 2021, 2023]
-test_total_electores =pd.DataFrame()
-for year in years:
-    print(f"Year: {year}")
-    test_total_electores = pd.concat([test_total_electores, add_electores_column_with_suffixes_not_agregated(year, "CANTON_CODIGO")], ignore_index=True)
+# Build df_votaciones_total_2 by concatenating per-year province outputs
+df_votaciones_total = pd.DataFrame()
+for year in available_years:
+    for codigo, provincia in provincias_dict.items():
+        print(f"Year: {year}, Provincia: {provincia}")
+        try:
+            df_provincia = merge_presidentes_votes_by_rounds(year, territorio="CANTON", territorio_codigo=codigo)
+            df_votaciones_total = pd.concat([df_votaciones_total, df_provincia], ignore_index=True)
+        except Exception as e:
+            print(f"Warning: failed to process year {year} province {provincia}: {e}")
 
-#%%
+df_votaciones_total_2 = df_votaciones_total.copy()
+
+# Build test_total_electores by aggregating registro info for same years
+test_total_electores = pd.DataFrame()
+for year in available_years:
+    print(f"Aggregating electors for year: {year}")
+    try:
+        test_total_electores = pd.concat([test_total_electores, add_electores_column_with_suffixes_not_agregated(year, "CANTON_CODIGO")], ignore_index=True)
+    except Exception as e:
+        print(f"Warning: failed to aggregate electors for year {year}: {e}")
+
+# Merge votation and electors
 df_test_join = pd.merge(df_votaciones_total_2, test_total_electores, on=["ANIO", "CANTON_CODIGO"], how="inner")
 
 
@@ -866,9 +865,116 @@ df_electors_sufragantes_processed["GROUP_DETAIL"]=df_electors_sufragantes_proces
 df_electors_sufragantes_processed.sort_values(by=["ANIO","VUELTA","PROVINCIA_CODIGO","CANTON_CODIGO","GROUP"],inplace=True)
 #%%
 df_electors_sufragantes_processed.rename(columns={"GROUP_DETAIL":"AGRUPACION","GROUP":"CATEGORIA","COUNT":"CANTIDAD"},inplace=True)
-#%%
-df_electors_sufragantes_processed.to_csv("tests/Presidenciales/presidentes_electores_sufragantes_cantonal_formato_corto.csv",index=False)
-#%%
-df_sorted.rename(columns={"VOTE_COUNT":"VOTOS"},inplace=True)
-#%%
-df_sorted.to_csv("tests/Presidenciales/presidentes_votacion_cantonal_formato_corto.csv",index=False)
+
+#%% EXPORT CONSOLIDATED FILES AND YEAR-SPECIFIC FILES
+# Create base output directory if it doesn't exist
+base_output_dir = "tests/Presidenciales"
+if not os.path.exists(base_output_dir):
+    os.makedirs(base_output_dir)
+
+# Save consolidated files
+df_electors_sufragantes_processed.to_csv(f"{base_output_dir}/presidentes_electores_sufragantes_cantonal_formato_corto.csv", index=False)
+df_sorted.rename(columns={"VOTE_COUNT":"VOTOS"}, inplace=True)
+df_sorted.to_csv(f"{base_output_dir}/presidentes_votacion_cantonal_formato_corto.csv", index=False)
+
+print("\n✅ Consolidated files saved to tests/Presidenciales/")
+
+# Create year-specific subdirectories and save year-specific files
+for year in available_years:
+    year_dir = f"{base_output_dir}/{year}"
+    if not os.path.exists(year_dir):
+        os.makedirs(year_dir)
+    
+    # Filter data for this year
+    df_votes_year = df_sorted[df_sorted['ANIO'] == year]
+    df_electors_year = df_electors_sufragantes_processed[df_electors_sufragantes_processed['ANIO'] == year]
+    
+    if not df_votes_year.empty:
+        # Save votes in long format (angosto)
+        df_votes_year.to_csv(
+            f"{year_dir}/presidentes_votacion_cantonal_formato_angosto_{year}.csv",
+            index=False
+        )
+        
+        # Create wide format (ancho) - pivot by candidates
+        df_votes_pivot = df_votes_year[df_votes_year['CANDIDATO_NOMBRE'] != 'BLANCOS'].copy()
+        df_votes_pivot = df_votes_pivot[df_votes_pivot['CANDIDATO_NOMBRE'] != 'NULOS']
+        
+        # Get blancos and nulos for each canton/round
+        df_blancos_nulos = df_votes_year[
+            (df_votes_year['CANDIDATO_NOMBRE'].isin(['BLANCOS', 'NULOS']))
+        ][['ANIO', 'VUELTA', 'PROVINCIA_CODIGO', 'PROVINCIA_NOMBRE', 'CANTON_CODIGO', 'CANTON_NOMBRE', 'CANDIDATO_NOMBRE', 'VOTE_COUNT']]
+        
+        # Pivot candidates
+        df_wide = df_votes_pivot.pivot_table(
+            index=['ANIO', 'VUELTA', 'PROVINCIA_CODIGO', 'PROVINCIA_NOMBRE', 'CANTON_CODIGO', 'CANTON_NOMBRE'],
+            columns='CANDIDATO_NOMBRE',
+            values='VOTE_COUNT',
+            aggfunc='first'
+        ).reset_index()
+        
+        # Add blancos and nulos columns
+        for col in df_blancos_nulos['CANDIDATO_NOMBRE'].unique():
+            blancos_nulos_data = df_blancos_nulos[df_blancos_nulos['CANDIDATO_NOMBRE'] == col]
+            df_wide = df_wide.merge(
+                blancos_nulos_data[['VUELTA', 'CANTON_CODIGO', 'CANDIDATO_NOMBRE', 'VOTE_COUNT']].rename(
+                    columns={'VOTE_COUNT': col}
+                ),
+                on=['VUELTA', 'CANTON_CODIGO'],
+                how='left'
+            )
+            df_wide.drop('CANDIDATO_NOMBRE', axis=1, errors='ignore', inplace=True)
+        
+        # Reorder columns: geographic first, then candidates
+        geo_cols = ['ANIO', 'VUELTA', 'PROVINCIA_CODIGO', 'PROVINCIA_NOMBRE', 'CANTON_CODIGO', 'CANTON_NOMBRE']
+        candidate_cols = sorted([col for col in df_wide.columns if col not in geo_cols])
+        df_wide = df_wide[geo_cols + candidate_cols]
+        
+        df_wide.fillna(0, inplace=True)
+        df_wide.to_csv(
+            f"{year_dir}/presidentes_votacion_cantonal_formato_ancho_{year}.csv",
+            index=False
+        )
+        
+        # Create short format (corto) - summary by canton and round
+        df_votes_corto = df_votes_year[
+            df_votes_year['CANDIDATO_NOMBRE'].isin(['BLANCOS', 'NULOS'])
+        ][['ANIO', 'VUELTA', 'CANTON_CODIGO', 'CANDIDATO_NOMBRE', 'VOTE_COUNT']].copy()
+        
+        df_votes_corto = df_votes_corto.pivot_table(
+            index=['ANIO', 'VUELTA', 'CANTON_CODIGO'],
+            columns='CANDIDATO_NOMBRE',
+            values='VOTE_COUNT',
+            aggfunc='first'
+        ).reset_index()
+        df_votes_corto.fillna(0, inplace=True)
+        df_votes_corto.to_csv(
+            f"{year_dir}/presidentes_votacion_cantonal_formato_corto_{year}.csv",
+            index=False
+        )
+        
+        print(f"✅ Year {year}: Saved votes in 3 formats (angosto, ancho, corto)")
+    
+    if not df_electors_year.empty:
+        # Save electors in long format (angosto)
+        df_electors_angosto = df_electors_year[['ANIO', 'PROVINCIA_CODIGO', 'PROVINCIA_NOMBRE', 'CANTON_CODIGO', 'CANTON_NOMBRE', 'AGRUPACION', 'CANTIDAD']]
+        df_electors_angosto = df_electors_angosto.drop_duplicates()
+        df_electors_angosto.to_csv(
+            f"{year_dir}/presidentes_electores_sufragantes_cantonal_formato_angosto_{year}.csv",
+            index=False
+        )
+        
+        # Save electors in detailed format (corto)
+        df_electors_corto = df_electors_year[['ANIO', 'VUELTA', 'PROVINCIA_CODIGO', 'PROVINCIA_NOMBRE', 'CANTON_CODIGO', 'CANTON_NOMBRE', 'AGRUPACION', 'CATEGORIA', 'CANTIDAD']]
+        df_electors_corto = df_electors_corto.drop_duplicates()
+        df_electors_corto.to_csv(
+            f"{year_dir}/presidentes_electores_sufragantes_cantonal_formato_corto_{year}.csv",
+            index=False
+        )
+        
+        print(f"✅ Year {year}: Saved electors in 2 formats (angosto, corto)")
+
+print(f"\n🎉 All data from years {available_years} successfully exported to tests/Presidenciales/")
+print("📁 Directory structure:")
+for year in available_years:
+    print(f"   tests/Presidenciales/{year}/ - CSV files for {year}")

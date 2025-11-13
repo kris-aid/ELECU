@@ -1,0 +1,15 @@
+LICENSE.TXT
+README.md
+setup.py
+aplied_scripts/__init__.py
+aplied_scripts/test1.py
+aplied_scripts/testin.py
+elecu.egg-info/PKG-INFO
+elecu.egg-info/SOURCES.txt
+elecu.egg-info/dependency_links.txt
+elecu.egg-info/requires.txt
+elecu.egg-info/top_level.txt
+tests/test_convert_sav_to_csv.py
+tests/test_exctract.py
+tests/test_restructure.py
+tests/test_standard_dictionaries.py
