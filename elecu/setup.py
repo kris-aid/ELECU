@@ -13,5 +13,5 @@ setup(
         description = DESCRIPTION,
         long_description=LONG_DESCRIPTION,
         packages=find_packages(),
-        install_requires = ['pandas', 'matplotlib', 'numpy', 'unidecode',"seaborn","folium","geopandas","pyreadstat"],
+        install_requires = ['pandas', 'matplotlib', 'numpy', 'unidecode',"seaborn","folium","geopandas","pyreadstat","plotly"],
 )
